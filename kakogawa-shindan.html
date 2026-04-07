@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>加古川教習所 簡単料金診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CSS変数 - 色・サイズ管理（変更しやすく）
+   ============================================================ */
+:root {
+  --primary: #1a6b3c;       /* メイングリーン */
+  --primary-light: #2e8b5a;
+  --primary-dark: #114d2b;
+  --accent: #f5a623;        /* アクセントオレンジ */
+  --accent-light: #ffc653;
+  --bg: #f7f9f5;            /* 背景 */
+  --bg-card: #ffffff;
+  --bg-soft: #edf4ee;
+  --text-main: #1e2d1e;
+  --text-sub: #5a6e5a;
+  --text-muted: #8a9e8a;
+  --border: #d4e4d4;
+  --error: #e53935;
+  --success: #2e7d32;
+  --shadow-sm: 0 2px 8px rgba(26,107,60,0.08);
+  --shadow-md: 0 4px 20px rgba(26,107,60,0.12);
+  --shadow-lg: 0 8px 32px rgba(26,107,60,0.16);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+  --font-main: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
+  --transition: 0.2s ease;
+}
+
+/* ============================================================
+   リセット・基本
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg);
+  color: var(--text-main);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ============================================================
+   ヘッダー
+   ============================================================ */
+.page-header {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%);
+  color: #fff;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-inner {
+  position: relative;
+  z-index: 1;
+  padding: 28px 20px 24px;
+  text-align: center;
+}
+
+.header-deco {
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.header-deco2 {
+  position: absolute;
+  bottom: -30px; left: -20px;
+  width: 100px; height: 100px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+
+.school-name {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.85;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  margin-bottom: 14px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.badge {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.header-desc {
+  font-size: 13.5px;
+  opacity: 0.9;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   進捗バー
+   ============================================================ */
+.progress-wrap {
+  background: #fff;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  border-radius: 10px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+/* ============================================================
+   メインコンテナ
+   ============================================================ */
+.container {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+/* ============================================================
+   セクション・カード
+   ============================================================ */
+.section {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  animation: fadeInUp 0.4s ease both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title .icon {
+  width: 28px; height: 28px;
+  background: var(--bg-soft);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   フォームフィールド
+   ============================================================ */
+.field {
+  margin-bottom: 20px;
+}
+.field:last-child { margin-bottom: 0; }
+
+.field-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.required-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--error);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.field-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px; /* iOS zoom防止 */
+  font-family: var(--font-main);
+  color: var(--text-main);
+  background: var(--bg-soft);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  -webkit-appearance: none;
+}
+
+.field-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,107,60,0.12);
+  background: #fff;
+}
+
+.field-input.error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+}
+
+/* ============================================================
+   チップ選択
+   ============================================================ */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-family: var(--font-main);
+  font-weight: 500;
+  color: var(--text-sub);
+  background: var(--bg-soft);
+  border: 2px solid var(--border);
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.chip:active { transform: scale(0.96); }
+
+.chip.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(26,107,60,0.25);
+}
+
+.chip-check {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.chip.selected .chip-check {
+  background: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.6);
+}
+
+/* 大きいチップ（地域選択など） */
+.chip-group.large .chip {
+  padding: 12px 18px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+/* ============================================================
+   エラー表示
+   ============================================================ */
+.error-msg {
+  font-size: 12px;
+  color: var(--error);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.error-msg::before { content: "⚠️"; font-size: 11px; }
+
+/* ============================================================
+   その他入力欄（非表示→表示）
+   ============================================================ */
+.other-input-wrap {
+  display: none;
+  margin-top: 10px;
+}
+.other-input-wrap.visible { display: block; }
+
+/* ============================================================
+   CTAボタン
+   ============================================================ */
+.cta-section {
+  padding: 8px 0;
+  text-align: center;
+}
+
+.btn-cta {
+  display: block;
+  width: 100%;
+  padding: 18px 24px;
+  font-size: 18px;
+  font-family: var(--font-main);
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(26,107,60,0.35);
+  letter-spacing: 0.04em;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.12));
+}
+
+.btn-cta:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(26,107,60,0.3); }
+
+.btn-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-cta .btn-sub {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-top: 3px;
+}
+
+/* ============================================================
+   料金結果エリア
+   ============================================================ */
+#result-section {
+  display: none;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.result-card {
+  background: linear-gradient(135deg, var(--bg-soft) 0%, #fff 100%);
+  border: 2px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.result-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.result-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.result-price {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--primary-dark);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.result-price .unit { font-size: 18px; font-weight: 700; }
+
+.result-note {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 16px;
+}
+
+.result-message {
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.8;
+  text-align: left;
+  border: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.result-highlight {
+  background: linear-gradient(135deg, #fff9e6, #fff3cd);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #7a5000;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   LINEボタン
+   ============================================================ */
+.btn-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 17px;
+  font-family: var(--font-main);
+  font-weight: 900;
+  color: #fff;
+  background: #06c755;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(6,199,85,0.35);
+  letter-spacing: 0.04em;
+}
+
+.btn-line:active { transform: scale(0.98); }
+
+.line-icon {
+  width: 28px; height: 28px;
+  background: #fff;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.line-note {
+  font-size: 12px;
+  color: var(--text-sub);
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* ============================================================
+   完了画面
+   ============================================================ */
+#complete-section {
+  display: none;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.complete-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+
+.complete-icon {
+  font-size: 56px;
+  margin-bottom: 12px;
+}
+
+.complete-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+}
+
+.complete-msg {
+  font-size: 14px;
+  color: var(--text-sub);
+  line-height: 1.8;
+  margin-bottom: 24px;
+}
+
+/* ============================================================
+   信頼バッジ
+   ============================================================ */
+.trust-bar {
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.trust-item {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+.trust-item .trust-icon {
+  font-size: 20px;
+  display: block;
+  margin-bottom: 3px;
+}
+
+/* ============================================================
+   ローディング
+   ============================================================ */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.9);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-overlay.active { display: flex; }
+
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* ============================================================
+   セパレーター
+   ============================================================ */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ============================================================
+   スマホ最適化
+   ============================================================ */
+@media (max-width: 380px) {
+  .page-title { font-size: 21px; }
+  .chip { font-size: 13px; padding: 9px 13px; }
+  .btn-cta { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ローディング -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">送信中...</div>
+</div>
+
+<!-- ヘッダー -->
+<header class="page-header">
+  <div class="header-deco"></div>
+  <div class="header-deco2"></div>
+  <div class="header-inner">
+    <p class="school-name">🚗 加古川自動車教習所</p>
+    <h1 class="page-title">かんたん料金診断</h1>
+    <div class="badges">
+      <span class="badge">⏱ 最短1分</span>
+      <span class="badge">👆 タップ中心</span>
+      <span class="badge">💰 概算料金がすぐわかる</span>
+    </div>
+    <p class="header-desc">かんたんな入力で概算料金をチェックできます。キャンペーンや割引の適用でさらにお安くなる場合もあります。</p>
+  </div>
+</header>
+
+<!-- 進捗バー -->
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="progress-text">入力状況</span>
+    <span id="progress-percent">0%</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+</div>
+
+<!-- メインコンテンツ -->
+<div class="container">
+
+  <!-- 信頼バッジ -->
+  <div class="trust-bar">
+    <div class="trust-item">
+      <span class="trust-icon">🔒</span>個人情報<br>保護
+    </div>
+    <div class="trust-item">
+      <span class="trust-icon">📞</span>担当者が<br>丁寧にご案内
+    </div>
+    <div class="trust-item">
+      <span class="trust-icon">🎁</span>各種割引<br>適用可
+    </div>
+  </div>
+
+  <!-- ==============================
+       フォーム（診断入力）
+       ============================== -->
+  <div id="form-section">
+
+    <!-- セクション2: お住まいの地域 -->
+    <div class="section" style="animation-delay:0.1s">
+      <div class="section-title">
+        <span class="icon">📍</span>お住まいの地域
+      </div>
+      <div class="field" id="field-area">
+        <label class="field-label">
+          地域を選択してください <span class="required-badge">必須</span>
+        </label>
+        <!-- 地域チップ -->
+        <div class="chip-group large" id="chips-area">
+          <button type="button" class="chip" data-value="加古川市" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>加古川市
+          </button>
+          <button type="button" class="chip" data-value="高砂市" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>高砂市
+          </button>
+          <button type="button" class="chip" data-value="姫路市" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>姫路市
+          </button>
+          <button type="button" class="chip" data-value="明石市" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>明石市
+          </button>
+          <button type="button" class="chip" data-value="稲美町" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>稲美町
+          </button>
+          <button type="button" class="chip" data-value="播磨町" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>播磨町
+          </button>
+          <button type="button" class="chip" data-value="三木市" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>三木市
+          </button>
+          <button type="button" class="chip" data-value="小野市" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>小野市
+          </button>
+          <button type="button" class="chip" data-value="加西市" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>加西市
+          </button>
+          <button type="button" class="chip" data-value="神戸市西区" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>神戸市西区
+          </button>
+          <button type="button" class="chip" data-value="その他" onclick="selectChip('area',this)">
+            <span class="chip-check">✓</span>その他
+          </button>
+        </div>
+        <div class="other-input-wrap" id="other-area-wrap">
+          <input type="text" class="field-input" id="other-area" placeholder="お住まいの地域を入力してください">
+        </div>
+        <div class="error-msg" id="err-area" style="display:none">地域を選択してください</div>
+      </div>
+    </div>
+
+    <!-- セクション3: 現在の免許 -->
+    <div class="section" style="animation-delay:0.15s">
+      <div class="section-title">
+        <span class="icon">🪪</span>現在の免許について
+      </div>
+
+      <!-- 現在の免許 -->
+      <div class="field" id="field-current-license">
+        <label class="field-label">
+          現在お持ちの免許 <span class="required-badge">必須</span>
+        </label>
+        <div class="chip-group" id="chips-current-license">
+          <button type="button" class="chip" data-value="なし" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>なし
+          </button>
+          <button type="button" class="chip" data-value="原付" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>原付
+          </button>
+          <button type="button" class="chip" data-value="普通車AT" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>普通車AT
+          </button>
+          <button type="button" class="chip" data-value="普通車MT" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>普通車MT
+          </button>
+          <button type="button" class="chip" data-value="普通二輪" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>普通二輪
+          </button>
+          <button type="button" class="chip" data-value="大型二輪" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>大型二輪
+          </button>
+          <button type="button" class="chip" data-value="中型免許" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>中型免許
+          </button>
+          <button type="button" class="chip" data-value="その他" onclick="selectChip('currentLicense',this)">
+            <span class="chip-check">✓</span>その他
+          </button>
+        </div>
+        <div class="other-input-wrap" id="other-license-wrap">
+          <input type="text" class="field-input" id="other-license" placeholder="お持ちの免許を入力してください">
+        </div>
+        <div class="error-msg" id="err-current-license" style="display:none">現在の免許を選択してください</div>
+      </div>
+
+      <!-- 卒業生か -->
+      <div class="field" id="field-graduate">
+        <label class="field-label">弊社の卒業生ですか？</label>
+        <div class="chip-group" id="chips-graduate">
+          <button type="button" class="chip" data-value="はい" onclick="selectChip('graduate',this)">
+            <span class="chip-check">✓</span>はい
+          </button>
+          <button type="button" class="chip" data-value="いいえ" onclick="selectChip('graduate',this)">
+            <span class="chip-check">✓</span>いいえ
+          </button>
+          <button type="button" class="chip" data-value="免許なし" onclick="selectChip('graduate',this)">
+            <span class="chip-check">✓</span>免許なし
+          </button>
+        </div>
+        <div class="error-msg" id="err-graduate" style="display:none">選択してください</div>
+      </div>
+    </div>
+
+    <!-- セクション4: きっかけ -->
+    <div class="section" style="animation-delay:0.2s">
+      <div class="section-title">
+        <span class="icon">💡</span>弊社を知ったきっかけ
+      </div>
+      <div class="field" id="field-source">
+        <div class="chip-group" id="chips-source">
+          <button type="button" class="chip" data-value="Instagram" onclick="selectChip('source',this)">
+            <span class="chip-check">✓</span>📸 Instagram
+          </button>
+          <button type="button" class="chip" data-value="TikTok" onclick="selectChip('source',this)">
+            <span class="chip-check">✓</span>🎵 TikTok
+          </button>
+          <button type="button" class="chip" data-value="ホームページ" onclick="selectChip('source',this)">
+            <span class="chip-check">✓</span>🌐 HP
+          </button>
+          <button type="button" class="chip" data-value="紹介" onclick="selectChip('source',this)">
+            <span class="chip-check">✓</span>👥 紹介
+          </button>
+          <button type="button" class="chip" data-value="Google検索" onclick="selectChip('source',this)">
+            <span class="chip-check">✓</span>🔍 Google
+          </button>
+          <button type="button" class="chip" data-value="その他" onclick="selectChip('source',this)">
+            <span class="chip-check">✓</span>その他
+          </button>
+        </div>
+        <div class="other-input-wrap" id="other-source-wrap">
+          <input type="text" class="field-input" id="other-source" placeholder="きっかけを入力してください">
+        </div>
+        <div class="error-msg" id="err-source" style="display:none">選択してください</div>
+      </div>
+    </div>
+
+    <!-- セクション5: 取得希望免許 -->
+    <div class="section" style="animation-delay:0.25s">
+      <div class="section-title">
+        <span class="icon">🎯</span>取得したい免許
+      </div>
+      <div class="field" id="field-target-license">
+        <label class="field-label">
+          取得を希望する免許を選択 <span class="required-badge">必須</span>
+        </label>
+        <div class="chip-group large" id="chips-target-license">
+          <button type="button" class="chip" data-value="車AT" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>🚗 車AT
+          </button>
+          <button type="button" class="chip" data-value="車MT" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>🚗 車MT
+          </button>
+          <button type="button" class="chip" data-value="中型バイク" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>🏍 中型バイク
+          </button>
+          <button type="button" class="chip" data-value="大型バイク" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>🏍 大型バイク
+          </button>
+          <button type="button" class="chip" data-value="小型バイク" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>🛵 小型バイク
+          </button>
+          <button type="button" class="chip" data-value="中型免許" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>🚛 中型免許
+          </button>
+          <button type="button" class="chip" data-value="ペーパードライバー講習" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>📄 ペーパードライバー
+          </button>
+          <button type="button" class="chip" data-value="その他" onclick="selectChip('targetLicense',this)">
+            <span class="chip-check">✓</span>その他
+          </button>
+        </div>
+        <div class="other-input-wrap" id="other-target-wrap">
+          <input type="text" class="field-input" id="other-target" placeholder="取得したい免許を入力してください">
+        </div>
+        <div class="error-msg" id="err-target-license" style="display:none">取得希望免許を選択してください</div>
+      </div>
+    </div>
+
+    <!-- セクション6: アンケート -->
+    <div class="section" style="animation-delay:0.3s">
+      <div class="section-title">
+        <span class="icon">📋</span>かんたんアンケート
+        <span style="font-size:11px;color:var(--text-muted);font-weight:400">割引適用の参考になります</span>
+      </div>
+
+      <!-- 紹介者 -->
+      <div class="field" id="field-introducer">
+        <label class="field-label">紹介者はいますか？</label>
+        <div class="chip-group" id="chips-introducer">
+          <button type="button" class="chip" data-value="あり" onclick="selectChip('introducer',this)">
+            <span class="chip-check">✓</span>🙋 あり
+          </button>
+          <button type="button" class="chip" data-value="なし" onclick="selectChip('introducer',this)">
+            <span class="chip-check">✓</span>なし
+          </button>
+        </div>
+        <div class="error-msg" id="err-introducer" style="display:none">選択してください</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 家族が卒業生か -->
+      <div class="field" id="field-family">
+        <label class="field-label">ご家族が弊社で免許を取られていますか？</label>
+        <div class="chip-group" id="chips-family">
+          <button type="button" class="chip" data-value="はい" onclick="selectChip('family',this)">
+            <span class="chip-check">✓</span>👨‍👩‍👧 はい
+          </button>
+          <button type="button" class="chip" data-value="いいえ" onclick="selectChip('family',this)">
+            <span class="chip-check">✓</span>いいえ
+          </button>
+        </div>
+        <div class="error-msg" id="err-family" style="display:none">選択してください</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 入所人数 -->
+      <div class="field" id="field-group">
+        <label class="field-label">入所人数は？</label>
+        <div class="chip-group" id="chips-group">
+          <button type="button" class="chip" data-value="1人で入所" onclick="selectChip('group',this)">
+            <span class="chip-check">✓</span>👤 1人で入所
+          </button>
+          <button type="button" class="chip" data-value="2人以上で入所" onclick="selectChip('group',this)">
+            <span class="chip-check">✓</span>👥 2人以上
+          </button>
+        </div>
+        <div class="error-msg" id="err-group" style="display:none">選択してください</div>
+      </div>
+    </div>
+
+    <!-- セクション7: お客様情報（最後に入力・離脱防止） -->
+    <div class="section" style="animation-delay:0.35s">
+      <div class="section-title">
+        <span class="icon">👤</span>最後にお名前と連絡先を教えてください
+      </div>
+      <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px;line-height:1.7;">
+        担当者からのご案内に使用します。営業電話などには使用しません🙏
+      </p>
+
+      <!-- お名前 -->
+      <div class="field" id="field-name">
+        <label class="field-label">
+          お名前 <span class="required-badge">必須</span>
+        </label>
+        <input type="text" class="field-input" id="input-name" placeholder="例：加古川 太郎" autocomplete="name" inputmode="text">
+        <div class="error-msg" id="err-name" style="display:none">お名前を入力してください</div>
+      </div>
+
+      <!-- 年齢 -->
+      <div class="field" id="field-age">
+        <label class="field-label">
+          年齢 <span class="required-badge">必須</span>
+        </label>
+        <input type="number" class="field-input" id="input-age" placeholder="例：22" min="14" max="99" inputmode="numeric">
+        <div class="error-msg" id="err-age" style="display:none">年齢を入力してください</div>
+      </div>
+
+      <!-- 電話番号 -->
+      <div class="field" id="field-tel">
+        <label class="field-label">
+          電話番号 <span class="required-badge">必須</span>
+        </label>
+        <input type="tel" class="field-input" id="input-tel" placeholder="例：090-1234-5678" autocomplete="tel" inputmode="tel">
+        <div class="error-msg" id="err-tel" style="display:none">電話番号を入力してください</div>
+      </div>
+    </div>
+
+    <!-- CTAボタン -->
+    <div class="cta-section">
+      <button class="btn-cta" id="btn-diagnose" onclick="runDiagnosis()">
+        💰 簡単料金診断をはじめる
+        <span class="btn-sub">タップで概算料金を表示します</span>
+      </button>
+    </div>
+
+  </div><!-- /#form-section -->
+
+  <!-- ==============================
+       料金結果エリア
+       ============================== -->
+  <div id="result-section">
+    <div class="result-card">
+      <div class="result-icon">💰</div>
+      <div class="result-label">概算料金の目安</div>
+      <div class="result-price" id="result-price-text">—</div>
+      <div class="result-note">※あくまでも概算の目安です。正確な料金は個別にご案内いたします。</div>
+
+      <div class="result-message">
+        概算料金の目安が表示されました。<br><br>
+        ただし、時期やキャンペーン、ご紹介割引、ご家族割引、複数名入所割引などにより、<strong>実際はさらにお安くご案内できる場合があります。</strong><br><br>
+        加古川教習所では、担当者よりキャンペーン内容を含めて個別にご案内しております。
+      </div>
+
+      <div class="result-highlight">
+        🎁 <strong>正確なお見積りをご希望の方は、</strong><br>
+        下記LINEを追加後、お名前を送信してください。<br>
+        担当者よりキャンペーンを含めてご案内いたします。
+      </div>
+
+      <a href="https://lin.ee/UnqfgBe" target="_blank" rel="noopener" class="btn-line">
+        <span class="line-icon">💬</span>
+        LINE追加はこちら
+      </a>
+      <p class="line-note">LINE追加後、お名前の送信をお願いいたします。</p>
+    </div>
+  </div>
+
+  <!-- ==============================
+       送信完了画面
+       ============================== -->
+  <div id="complete-section">
+    <div class="complete-card">
+      <div class="complete-icon">✅</div>
+      <h2 class="complete-title">送信完了しました</h2>
+      <p class="complete-msg">
+        ありがとうございました。<br>
+        担当者よりご連絡いたします。<br><br>
+        お急ぎの方は、LINEよりお問い合わせいただくとスムーズです。
+      </p>
+      <a href="https://lin.ee/UnqfgBe" target="_blank" rel="noopener" class="btn-line">
+        <span class="line-icon">💬</span>
+        LINE追加はこちら
+      </a>
+      <p class="line-note">LINE追加後、お名前の送信をお願いいたします。</p>
+    </div>
+  </div>
+
+</div><!-- /.container -->
+
+<script>
+/* ============================================================
+   設定値（後から変更しやすいよう一箇所で管理）
+   ============================================================ */
+
+// ---- Google Apps Script WebアプリURL ----
+// GASをデプロイした後、ここにURLを貼り付けてください
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwmA8QWpoAKpBPPXlEvJMxrYdVTKLQpSo6HIMcWoT-p6FALobjdEffbZiJ9l-OkgLcI/exec";
+
+// ---- LINE URL ----
+const LINE_URL = "https://lin.ee/UnqfgBe";
+
+// ---- 概算料金テーブル（令和7年4月1日改定版）----
+// 料金表の実費をそのまま反映。変更時はここだけ修正。
+// 単位: 円
+//
+// 【AT車 チャレンジコース】
+// 基本料金: 294,600円（全年齢共通）
+// スタンプ割(延長): 29,460円（延長保証）
+// 年齢別追加補講料:
+//   〜22歳: 0円（学割適用）
+//   23〜30歳: 0円（スタンプ割のみ）
+//   31〜35歳: 16,500円追加（15時間以下）
+//   36〜40歳: 22,000円追加（15時間以下）
+//   41〜45歳: 33,000円追加（15時間以下）
+//   46〜50歳: 55,000円追加（20時間以下）
+//   51〜59歳: 110,000円追加（30時間以下）
+//
+// 【MT車 チャレンジコース】
+// 基本料金: 314,100円（全年齢共通）
+// 一律 314,100〜356,510円
+
+const PRICE_TABLE_AT = {
+  // 年齢上限: { min, max } の形式
+  // min = 基本料金のみ, max = 基本+スタンプ割+補講料フル
+  22: { min: 294600, max: 335060, label: "〜22歳（学割適用）" },
+  30: { min: 294600, max: 346060, label: "23〜30歳" },
+  35: { min: 294600, max: 351560, label: "31〜35歳" },
+  40: { min: 294600, max: 357060, label: "36〜40歳" },
+  45: { min: 294600, max: 368060, label: "41〜45歳" },
+  50: { min: 294600, max: 390060, label: "46〜50歳" },
+  59: { min: 294600, max: 445060, label: "51〜59歳" },
+};
+
+const PRICE_TABLE_MT = {
+  // MT車は年齢に関係なく一律
+  all: { min: 314100, max: 356510, label: "MT車 チャレンジコース" },
+};
+
+// ---- バイク・中型免許 料金テーブル（令和7年4月1日改定版）----
+// 画像の料金表より合計金額を反映
+// min=基本(審査料なし想定の下限), max=合計(スタンプ割含む上限)
+const PRICE_TABLE_OTHER = {
+
+  // 【普通二輪 MT】合計 172,410円（1年限定）
+  "中型バイク": {
+    min: 172410, max: 172410,
+    note: "普通二輪車MT（1年限）",
+    detail: "普通自動二輪 MT・1年限定"
+  },
+
+  // 【大型二輪 AT含む】合計 307,050円（5年限）
+  "大型バイク": {
+    min: 307050, max: 307050,
+    note: "大型二輪（AT含む・5年限）",
+    detail: "大型自動二輪（AT限定含む）"
+  },
+
+  // 【普通二輪 AT】合計 205,410円（1年限）
+  "小型バイク": {
+    min: 205410, max: 205410,
+    note: "普通二輪車AT（1年限）",
+    detail: "普通自動二輪 AT限定・1年限定"
+  },
+
+  // 【中型免許 5t限定解除〜限定なし】
+  // 現在の免許状況により異なるため幅を持たせて表示
+  // 9時限審査: 137,210 / 11時限: 161,190 / 15時限(普通車から): 202,550
+  "中型免許": {
+    min: 137210, max: 202550,
+    note: "現在の免許内容により変わります",
+    detail: "9時限〜15時限審査（保有免許によって異なります）"
+  },
+
+  // ペーパードライバー・その他は概算
+  "ペーパードライバー講習": {
+    min: 15000, max: 40000,
+    note: "担当者にご確認ください",
+    detail: "ペーパードライバー向け講習"
+  },
+  "その他": {
+    min: 50000, max: 400000,
+    note: "担当者にご確認ください",
+    detail: "詳細は担当者にご案内します"
+  },
+};
+
+/* ============================================================
+   状態管理
+   ============================================================ */
+const state = {
+  area: "",
+  currentLicense: "",
+  graduate: "",
+  source: "",
+  targetLicense: "",
+  introducer: "",
+  family: "",
+  group: ""
+};
+
+// 送信済みフラグ（二重送信防止）
+let submitted = false;
+
+/* ============================================================
+   チップ選択処理
+   ============================================================ */
+function selectChip(key, el) {
+  // 同グループの選択解除
+  const groupId = "chips-" + camelToKebab(key);
+  const group = document.getElementById(groupId);
+  if (group) {
+    group.querySelectorAll(".chip").forEach(c => c.classList.remove("selected"));
+  }
+  el.classList.add("selected");
+  state[key] = el.dataset.value;
+
+  // 「その他」が選ばれたら入力欄を表示
+  handleOtherInput(key, el.dataset.value === "その他");
+
+  // エラーをクリア
+  const errEl = document.getElementById("err-" + camelToKebab(key));
+  if (errEl) errEl.style.display = "none";
+
+  updateProgress();
+}
+
+function camelToKebab(str) {
+  return str.replace(/([A-Z])/g, c => "-" + c.toLowerCase());
+}
+
+function handleOtherInput(key, show) {
+  const wrapIds = {
+    area: "other-area-wrap",
+    currentLicense: "other-license-wrap",
+    source: "other-source-wrap",
+    targetLicense: "other-target-wrap"
+  };
+  const id = wrapIds[key];
+  if (id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("visible", show);
+  }
+}
+
+/* ============================================================
+   進捗バー更新
+   ============================================================ */
+const REQUIRED_FIELDS = ["name","age","tel","area","currentLicense","targetLicense"];
+const ALL_FIELDS      = ["name","age","tel","area","currentLicense","graduate","source","targetLicense","introducer","family","group"];
+
+function updateProgress() {
+  let filled = 0;
+  if (document.getElementById("input-name").value.trim()) filled++;
+  if (document.getElementById("input-age").value.trim())  filled++;
+  if (document.getElementById("input-tel").value.trim())  filled++;
+  if (state.area)           filled++;
+  if (state.currentLicense) filled++;
+  if (state.graduate)       filled++;
+  if (state.source)         filled++;
+  if (state.targetLicense)  filled++;
+  if (state.introducer)     filled++;
+  if (state.family)         filled++;
+  if (state.group)          filled++;
+
+  const pct = Math.round((filled / ALL_FIELDS.length) * 100);
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-percent").textContent = pct + "%";
+  document.getElementById("progress-text").textContent = pct === 100 ? "入力完了！" : `入力中 (${filled}/${ALL_FIELDS.length})`;
+}
+
+// テキスト入力でも進捗更新
+["input-name","input-age","input-tel"].forEach(id => {
+  document.getElementById(id).addEventListener("input", updateProgress);
+});
+
+/* ============================================================
+   バリデーション
+   ============================================================ */
+function validateRequired() {
+  let ok = true;
+
+  // お名前
+  const name = document.getElementById("input-name").value.trim();
+  setFieldError("name", !name, document.getElementById("input-name"));
+  if (!name) ok = false;
+
+  // 年齢
+  const age = document.getElementById("input-age").value.trim();
+  setFieldError("age", !age, document.getElementById("input-age"));
+  if (!age) ok = false;
+
+  // 電話番号
+  const tel = document.getElementById("input-tel").value.trim();
+  setFieldError("tel", !tel, document.getElementById("input-tel"));
+  if (!tel) ok = false;
+
+  // 地域
+  if (!state.area) { showError("err-area"); ok = false; }
+
+  // 現在の免許
+  if (!state.currentLicense) { showError("err-current-license"); ok = false; }
+
+  // 取得希望免許
+  if (!state.targetLicense) { showError("err-target-license"); ok = false; }
+
+  return ok;
+}
+
+function setFieldError(key, hasError, inputEl) {
+  const errEl = document.getElementById("err-" + key);
+  if (errEl) errEl.style.display = hasError ? "flex" : "none";
+  if (inputEl) inputEl.classList.toggle("error", hasError);
+}
+
+function showError(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = "flex";
+}
+
+/* ============================================================
+   概算料金計算（年齢別・AT/MT対応）
+   ============================================================ */
+function calcPrice(targetLicense, currentLicense, age) {
+  const ageNum = parseInt(age, 10) || 0;
+
+  // 車AT：年齢別料金
+  if (targetLicense === "車AT") {
+    const brackets = [22, 30, 35, 40, 45, 50, 59];
+    for (const limit of brackets) {
+      if (ageNum <= limit) {
+        const row = PRICE_TABLE_AT[limit];
+        return {
+          min: row.min,
+          max: row.max,
+          ageLabel: row.label,
+          note: "普通自動車AT限定（チャレンジコース）"
+        };
+      }
+    }
+    // 60歳以上は担当者確認
+    return {
+      min: 294600, max: 500000,
+      ageLabel: "60歳以上",
+      note: "担当者にご確認ください"
+    };
+  }
+
+  // 車MT：一律
+  if (targetLicense === "車MT") {
+    const row = PRICE_TABLE_MT.all;
+    return {
+      min: row.min,
+      max: row.max,
+      ageLabel: row.label,
+      note: "普通自動車MT（チャレンジコース）"
+    };
+  }
+
+  // バイク・その他
+  const other = PRICE_TABLE_OTHER[targetLicense] || PRICE_TABLE_OTHER["その他"];
+  return {
+    min: other.min,
+    max: other.max,
+    ageLabel: other.detail || "",
+    note: other.note || "詳細は担当者にご確認ください"
+  };
+}
+
+function formatPrice(num) {
+  return num.toLocaleString("ja-JP");
+}
+
+/* ============================================================
+   診断実行
+   ============================================================ */
+function runDiagnosis() {
+  if (!validateRequired()) {
+    // 最初のエラー箇所へスクロール
+    const firstErr = document.querySelector(".error-msg[style='display: flex;']") ||
+                     document.querySelector(".field-input.error");
+    if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  // 料金計算（年齢を渡す）
+  const age         = document.getElementById("input-age").value.trim();
+  const priceResult = calcPrice(state.targetLicense, state.currentLicense, age);
+  const priceText   = `${formatPrice(priceResult.min)}円 〜 ${formatPrice(priceResult.max)}円程度`;
+
+  // 結果表示（年齢ラベルも表示）
+  const ageLine = priceResult.ageLabel
+    ? `<div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${priceResult.ageLabel}</div>`
+    : "";
+  const isSamePrice = priceResult.min === priceResult.max;
+  const priceHTML = isSamePrice
+    ? `<span class="unit">約</span> ${formatPrice(priceResult.min)}<span class="unit">円</span>`
+    : `<span class="unit">約</span> ${formatPrice(priceResult.min)}<span class="unit">円〜</span>${formatPrice(priceResult.max)}<span class="unit">円程度</span>`;
+  document.getElementById("result-price-text").innerHTML = ageLine + priceHTML;
+
+  // 結果エリア表示
+  const resultSec = document.getElementById("result-section");
+  resultSec.style.display = "block";
+  resultSec.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // データ収集してスプレッドシートへ送信
+  sendData(priceText);
+}
+
+/* ============================================================
+   データ送信（Google Apps Script経由）
+   ============================================================ */
+async function sendData(priceText) {
+  if (submitted) return;
+  submitted = true;
+
+  // ローディング表示
+  document.getElementById("loading").classList.add("active");
+  document.getElementById("btn-diagnose").disabled = true;
+
+  const payload = {
+    timestamp:     new Date().toLocaleString("ja-JP"),
+    name:          document.getElementById("input-name").value.trim(),
+    age:           document.getElementById("input-age").value.trim(),
+    tel:           document.getElementById("input-tel").value.trim(),
+    area:          state.area === "その他"
+                    ? (document.getElementById("other-area").value.trim() || "その他")
+                    : state.area,
+    currentLicense: state.currentLicense === "その他"
+                    ? (document.getElementById("other-license").value.trim() || "その他")
+                    : state.currentLicense,
+    graduate:      state.graduate,
+    source:        state.source === "その他"
+                    ? (document.getElementById("other-source").value.trim() || "その他")
+                    : state.source,
+    targetLicense: state.targetLicense === "その他"
+                    ? (document.getElementById("other-target").value.trim() || "その他")
+                    : state.targetLicense,
+    introducer:    state.introducer,
+    family:        state.family,
+    group:         state.group,
+    estimatedPrice: priceText
+  };
+
+  try {
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors", // GASはno-corsで送信
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    // 送信成功 → 完了画面表示
+    setTimeout(() => {
+      document.getElementById("loading").classList.remove("active");
+      document.getElementById("form-section").style.display  = "none";
+      document.getElementById("result-section").style.display = "none";
+      document.getElementById("complete-section").style.display = "block";
+      document.getElementById("complete-section").scrollIntoView({ behavior: "smooth" });
+    }, 1200);
+
+  } catch (e) {
+    // エラー時も結果は表示（送信失敗でも診断結果は見せる）
+    document.getElementById("loading").classList.remove("active");
+    console.error("送信エラー:", e);
+    submitted = false; // 再送信可能に
+    document.getElementById("btn-diagnose").disabled = false;
+  }
+}
+</script>
+</body>
+</html>
