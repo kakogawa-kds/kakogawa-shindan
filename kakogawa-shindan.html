@@ -1872,15 +1872,19 @@ async function sendChatMessage() {
   document.getElementById("chat-send-btn").disabled = true;
 
   try {
-    const lastMessage = chatHistory[chatHistory.length - 1]?.content || "";
-    const historyJson = encodeURIComponent(JSON.stringify(chatHistory));
-
-    const response = await fetch(
-      `${GAS_URL}?type=chat&history=${historyJson}`,
-      { method: "GET" }
+    const lastMessage = encodeURIComponent(
+      chatHistory[chatHistory.length - 1]?.content || ""
     );
 
-    const result = await response.json();
+    const gasUrl = `${GAS_URL}?type=chat&msg=${lastMessage}`;
+
+    const response = await fetch(gasUrl, {
+      method: "GET",
+      redirect: "follow"
+    });
+
+    const text = await response.text();
+    const result = JSON.parse(text);
     const reply = result.reply || "少々お待ちください。LINEでもご相談できます😊";
 
     hideTyping();
