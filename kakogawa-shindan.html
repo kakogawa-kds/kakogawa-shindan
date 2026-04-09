@@ -287,6 +287,9 @@ body {
   transition: all var(--transition);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .chip:active { transform: scale(0.96); }
@@ -621,6 +624,78 @@ body {
   .page-title { font-size: 21px; }
   .chip { font-size: 13px; padding: 9px 13px; }
   .btn-cta { font-size: 16px; }
+}
+
+/* クイック質問ボタン */
+.quick-btn {
+  padding: 7px 12px;
+  font-size: 12px;
+  font-family: var(--font-main);
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: var(--bg-soft);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.quick-btn:active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+/* チャットメッセージ */
+.chat-bubble-ai {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.chat-bubble-ai .bubble {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 4px 16px 16px 16px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-main);
+  max-width: 85%;
+  box-shadow: var(--shadow-sm);
+}
+.chat-bubble-user {
+  display: flex;
+  justify-content: flex-end;
+}
+.chat-bubble-user .bubble {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 16px 4px 16px 16px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  max-width: 80%;
+}
+.chat-typing {
+  display: flex;
+  gap: 4px;
+  padding: 12px 14px;
+  background: #fff;
+  border-radius: 4px 16px 16px 16px;
+  width: fit-content;
+  border: 1px solid var(--border);
+}
+.chat-typing span {
+  width: 7px; height: 7px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: typing 1.2s infinite;
+}
+.chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+.chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
 }
 </style>
 </head>
@@ -1009,7 +1084,7 @@ body {
   <!-- ==============================
        料金結果エリア
        ============================== -->
-  <div id="result-section">
+  <div id="result-section" style="display:none;">
     <div class="result-card">
       <div class="result-icon">💰</div>
       <div class="result-label">概算料金の目安</div>
@@ -1042,12 +1117,56 @@ body {
       </a>
       <p class="line-note">LINE追加後、お名前の送信をお願いいたします。</p>
     </div>
-  </div>
+
+    <!-- ==============================
+         AIチャットセクション
+         ============================== -->
+    <div id="ai-chat-section" style="margin-top:16px;">
+      <div style="background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:var(--shadow-md);overflow:hidden;">
+
+        <!-- チャットヘッダー -->
+        <div style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:14px 18px;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🤖</div>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:14px;">加古川教習所 AIスタッフ</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:11px;">● オンライン｜すぐにお答えします</div>
+          </div>
+        </div>
+
+        <!-- チャットメッセージエリア -->
+        <div id="chat-messages" style="padding:16px;min-height:200px;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;background:#f7f9f5;">
+        </div>
+
+        <!-- 入力エリア -->
+        <div style="padding:12px;background:#fff;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;">
+          <textarea id="chat-input" placeholder="質問を入力してください…" rows="1"
+            style="flex:1;padding:10px 14px;font-size:15px;font-family:var(--font-main);border:2px solid var(--border);border-radius:20px;outline:none;resize:none;line-height:1.5;max-height:100px;overflow-y:auto;"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}">
+          </textarea>
+          <button onclick="sendChatMessage()" id="chat-send-btn"
+            style="width:44px;height:44px;border-radius:50%;background:var(--primary);border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;">
+            ➤
+          </button>
+        </div>
+
+        <!-- クイック質問ボタン -->
+        <div style="padding:0 12px 12px;display:flex;flex-wrap:wrap;gap:6px;">
+          <button onclick="quickQuestion('料金をもっと詳しく教えて')" class="quick-btn">💰 料金詳細</button>
+          <button onclick="quickQuestion('どんな割引がありますか？')" class="quick-btn">🎁 割引内容</button>
+          <button onclick="quickQuestion('入所の流れを教えて')" class="quick-btn">📋 入所の流れ</button>
+          <button onclick="quickQuestion('学校に通いながらでも通える？')" class="quick-btn">🎓 通い方</button>
+          <button onclick="quickQuestion('バイクの免許も取れますか？')" class="quick-btn">🏍 バイク</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#result-section -->
 
   <!-- ==============================
        送信完了画面
        ============================== -->
-  <div id="complete-section">
+  <div id="complete-section" style="display:none;">
     <div class="complete-card">
       <div class="complete-icon">✅</div>
       <h2 class="complete-title">送信完了しました</h2>
@@ -1072,7 +1191,7 @@ body {
    ============================================================ */
 
 // ---- Google Apps Script WebアプリURL ----
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwmA8QWpoAKpBPPXlEvJMxrYdVTKLQpSo6HIMcWoT-p6FALobjdEffbZiJ9l-OkgLcI/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxtdFjgSZfniBAPSKU4cR3TassDWtA3DNISSq36uZfn699fiY-8aZ2yUn4mW2Nq6RfcDg/exec";
 
 // ---- LINE URL ----
 const LINE_URL = "https://lin.ee/UnqfgBe";
@@ -1472,6 +1591,10 @@ function runDiagnosis() {
     return;
   }
 
+  // チャット初期化フラグをリセット（再診断時も動くように）
+  chatInitialized = false;
+  chatHistory = [];
+
   const age    = document.getElementById("input-age").value.trim();
 
   // 学割：22歳以下は自動適用（職業不問）
@@ -1555,6 +1678,9 @@ function runDiagnosis() {
   resultSec.style.display = "block";
   resultSec.scrollIntoView({ behavior: "smooth", block: "start" });
 
+  // AIチャット即時初期化（sendDataとは独立して動かす）
+  initChat(priceText);
+
   sendData(priceText);
 }
 
@@ -1597,10 +1723,9 @@ async function sendData(priceText) {
 
     setTimeout(() => {
       document.getElementById("loading").classList.remove("active");
-      document.getElementById("form-section").style.display   = "none";
-      document.getElementById("result-section").style.display = "none";
-      document.getElementById("complete-section").style.display = "block";
-      document.getElementById("complete-section").scrollIntoView({ behavior: "smooth" });
+      document.getElementById("form-section").style.display = "none";
+      // result-sectionはチャットのために残す
+      // complete-sectionは表示しない（チャットで対応）
     }, 1200);
 
   } catch (e) {
@@ -1609,6 +1734,175 @@ async function sendData(priceText) {
     submitted = false;
     document.getElementById("btn-diagnose").disabled = false;
   }
+}
+
+/* ============================================================
+   AIチャット機能
+   ============================================================ */
+
+// 教習所の知識ベース（システムプロンプト）
+const CHAT_SYSTEM_PROMPT = `あなたは加古川自動車教習所の受付兼営業担当です。
+目的は「問い合わせ対応」と「入所・来社予約につなげること」です。
+以下のルールを必ず守ってください。
+
+# 【最重要】
+・返信はとにかく早く、短く、わかりやすく
+・お客様が離脱しないように会話を続ける
+・必ず最後に「次のアクション」を提示する
+
+# 【トーン】
+・丁寧だけど堅すぎない
+・LINE感覚（親しみやすい）
+・営業感は出しすぎないが、しっかり誘導する
+
+# 【対応ルール】
+① 質問には結論から答える
+② 詳細は必要な分だけ伝える（長文NG）
+③ 不明点があれば質問して会話を続ける
+④ 最終的に「来社 or 電話」へ誘導する
+
+# 【よくあるゴール】
+・料金案内 →「電話で最安案内できます」へ誘導
+・空き状況 →「枠確認するのでお電話ください」
+・入所 →「来社予約を取りましょう」
+
+# 【強い誘導ワード】
+・「電話の方が一番安く案内できます」
+・「5分ほどで最終料金出せます」
+・「今だと枠少ないので先に押さえた方がいいです」
+
+# 【禁止】
+・長文説明
+・専門用語の多用
+・一方的な説明で終わること
+
+# 【出力形式】
+・2〜4行で返答
+・最後は必ず質問 or 行動提案
+・絵文字を適度に使う
+
+# 【教習所基本情報】
+・名称：加古川自動車教習所
+・商圏：加古川市・高砂市・三木市・小野市
+・LINE：https://lin.ee/UnqfgBe
+
+# 【料金目安】
+・普通車AT：294,600円〜（年齢・割引により変動）
+・普通車MT：314,100円〜
+・バイク系：73,810円〜202,290円（所持免許により変動）
+・22歳以下は学割自動適用
+
+# 【割引】
+・学割／紹介割／家族割／卒割／LINE割／応急免除あり
+・組み合わせでさらにお得になる場合あり`;
+
+// チャット履歴
+let chatHistory = [];
+let chatInitialized = false;
+
+// チャット初期化（料金診断後に呼ぶ）
+function initChat(diagnosisResult) {
+  if (chatInitialized) return;
+  chatInitialized = true;
+
+  const messagesEl = document.getElementById("chat-messages");
+  messagesEl.innerHTML = "";
+
+  // 初回AIメッセージ
+  const greeting = diagnosisResult
+    ? `料金診断ありがとうございます！😊\n概算が出ましたね。\n割引を組み合わせるともっとお得になる可能性あります📞\n気になる点、何でも聞いてください！`
+    : `こんにちは！加古川教習所です😊\n料金や入所のことなど、お気軽にどうぞ！\nまず何が気になってますか？`;
+
+  addAIMessage(greeting);
+}
+
+// ユーザーメッセージ追加
+function addUserMessage(text) {
+  const el = document.getElementById("chat-messages");
+  const div = document.createElement("div");
+  div.className = "chat-bubble-user";
+  div.innerHTML = `<div class="bubble">${text.replace(/\n/g,"<br>")}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+// AIメッセージ追加
+function addAIMessage(text) {
+  const el = document.getElementById("chat-messages");
+  const div = document.createElement("div");
+  div.className = "chat-bubble-ai";
+  div.innerHTML = `
+    <div style="font-size:20px;flex-shrink:0;margin-top:2px;">🤖</div>
+    <div class="bubble">${text.replace(/\n/g,"<br>")}</div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+// タイピングインジケーター
+function showTyping() {
+  const el = document.getElementById("chat-messages");
+  const div = document.createElement("div");
+  div.className = "chat-bubble-ai";
+  div.id = "typing-indicator";
+  div.innerHTML = `
+    <div style="font-size:20px;flex-shrink:0;">🤖</div>
+    <div class="chat-typing"><span></span><span></span><span></span></div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById("typing-indicator");
+  if (el) el.remove();
+}
+
+// メッセージ送信
+async function sendChatMessage() {
+  const input = document.getElementById("chat-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  input.style.height = "auto";
+  addUserMessage(text);
+
+  chatHistory.push({ role: "user", content: text });
+  showTyping();
+
+  document.getElementById("chat-send-btn").disabled = true;
+
+  try {
+    // GASはno-corsで送信（CORSブロック回避）
+    // チャット用にGETパラメータ方式で送信
+    const params = new URLSearchParams({
+      type: "chat",
+      system: encodeURIComponent(data.system || CHAT_SYSTEM_PROMPT),
+      message: encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || "")
+    });
+
+    const response = await fetch(`${GAS_URL}?${params.toString()}`, {
+      method: "GET",
+    });
+
+    const result = await response.json();
+    const reply = result.reply || "少々お待ちください。LINEでもご相談できます😊";
+
+    hideTyping();
+    addAIMessage(reply);
+    chatHistory.push({ role: "assistant", content: reply });
+
+  } catch (e) {
+    hideTyping();
+    addAIMessage("申し訳ありません、通信エラーが発生しました。\nLINEよりお問い合わせください💬\nhttps://lin.ee/UnqfgBe");
+  }
+
+  document.getElementById("chat-send-btn").disabled = false;
+}
+
+// クイック質問
+function quickQuestion(text) {
+  document.getElementById("chat-input").value = text;
+  sendChatMessage();
 }
 </script>
 
