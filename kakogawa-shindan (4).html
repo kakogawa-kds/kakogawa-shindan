@@ -1872,18 +1872,20 @@ async function sendChatMessage() {
   document.getElementById("chat-send-btn").disabled = true;
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "chat",
-        system: CHAT_SYSTEM_PROMPT,
-        messages: chatHistory
-      })
+    // GASはno-corsで送信（CORSブロック回避）
+    // チャット用にGETパラメータ方式で送信
+    const params = new URLSearchParams({
+      type: "chat",
+      system: encodeURIComponent(data.system || CHAT_SYSTEM_PROMPT),
+      message: encodeURIComponent(chatHistory[chatHistory.length - 1]?.content || "")
     });
 
-    const data = await response.json();
-    const reply = data.reply || "少々お待ちください。LINEでもご相談できます😊";
+    const response = await fetch(`${GAS_URL}?${params.toString()}`, {
+      method: "GET",
+    });
+
+    const result = await response.json();
+    const reply = result.reply || "少々お待ちください。LINEでもご相談できます😊";
 
     hideTyping();
     addAIMessage(reply);
