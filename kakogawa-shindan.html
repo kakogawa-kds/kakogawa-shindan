@@ -836,28 +836,34 @@ body {
           取得を希望する免許を選択 <span class="required-badge">必須</span>
         </label>
         <div class="chip-group large" id="chips-target-license">
-          <button type="button" class="chip" data-value="車AT" onclick="selectChip('targetLicense',this)">
+          <button type="button" class="chip" data-value="車AT" onclick="selectChip('targetLicense',this);onTargetLicenseChange('車AT')">
             <span class="chip-check">✓</span>🚗 車AT
           </button>
-          <button type="button" class="chip" data-value="車MT" onclick="selectChip('targetLicense',this)">
+          <button type="button" class="chip" data-value="車MT" onclick="selectChip('targetLicense',this);onTargetLicenseChange('車MT')">
             <span class="chip-check">✓</span>🚗 車MT
           </button>
-          <button type="button" class="chip" data-value="中型バイク" onclick="selectChip('targetLicense',this)">
-            <span class="chip-check">✓</span>🏍 中型バイク
+          <button type="button" class="chip" data-value="普通自動二輪MT" onclick="selectChip('targetLicense',this);onTargetLicenseChange('普通自動二輪MT')">
+            <span class="chip-check">✓</span>🏍 普通二輪MT
           </button>
-          <button type="button" class="chip" data-value="大型バイク" onclick="selectChip('targetLicense',this)">
-            <span class="chip-check">✓</span>🏍 大型バイク
+          <button type="button" class="chip" data-value="普通自動二輪AT" onclick="selectChip('targetLicense',this);onTargetLicenseChange('普通自動二輪AT')">
+            <span class="chip-check">✓</span>🏍 普通二輪AT
           </button>
-          <button type="button" class="chip" data-value="小型バイク" onclick="selectChip('targetLicense',this)">
-            <span class="chip-check">✓</span>🛵 小型バイク
+          <button type="button" class="chip" data-value="小型二輪MT" onclick="selectChip('targetLicense',this);onTargetLicenseChange('小型二輪MT')">
+            <span class="chip-check">✓</span>🛵 小型二輪MT
           </button>
-          <button type="button" class="chip" data-value="中型免許" onclick="selectChip('targetLicense',this)">
+          <button type="button" class="chip" data-value="小型二輪AT限定" onclick="selectChip('targetLicense',this);onTargetLicenseChange('小型二輪AT限定')">
+            <span class="chip-check">✓</span>🛵 小型二輪AT
+          </button>
+          <button type="button" class="chip" data-value="大型自動二輪" onclick="selectChip('targetLicense',this);onTargetLicenseChange('大型自動二輪')">
+            <span class="chip-check">✓</span>🏍 大型二輪
+          </button>
+          <button type="button" class="chip" data-value="中型免許" onclick="selectChip('targetLicense',this);onTargetLicenseChange('中型免許')">
             <span class="chip-check">✓</span>🚛 中型免許
           </button>
-          <button type="button" class="chip" data-value="ペーパードライバー講習" onclick="selectChip('targetLicense',this)">
+          <button type="button" class="chip" data-value="ペーパードライバー講習" onclick="selectChip('targetLicense',this);onTargetLicenseChange('ペーパードライバー講習')">
             <span class="chip-check">✓</span>📄 ペーパードライバー
           </button>
-          <button type="button" class="chip" data-value="その他" onclick="selectChip('targetLicense',this)">
+          <button type="button" class="chip" data-value="その他" onclick="selectChip('targetLicense',this);onTargetLicenseChange('その他')">
             <span class="chip-check">✓</span>その他
           </button>
         </div>
@@ -865,6 +871,37 @@ body {
           <input type="text" class="field-input" id="other-target" placeholder="取得したい免許を入力してください">
         </div>
         <div class="error-msg" id="err-target-license" style="display:none">取得希望免許を選択してください</div>
+      </div>
+    </div>
+
+    <!-- バイク専用: 所持免許選択（動的表示） -->
+    <div class="section" id="section-bike-license" style="display:none;animation-delay:0.28s">
+      <div class="section-title">
+        <span class="icon">🪪</span>現在お持ちの免許（料金に影響します）
+      </div>
+      <p style="font-size:12px;color:var(--text-sub);margin-bottom:12px;">⚠️ 所持免許によって基本料金が大きく変わります</p>
+      <div class="chip-group" id="chips-bike-owned-license">
+        <!-- JSで動的に生成 -->
+      </div>
+      <div class="error-msg" id="err-bike-owned-license" style="display:none">所持免許を選択してください</div>
+    </div>
+
+    <!-- バイク専用: オプション・割引（動的表示） -->
+    <div class="section" id="section-bike-options" style="display:none;animation-delay:0.31s">
+      <div class="section-title">
+        <span class="icon">🎁</span>割引
+        <span style="font-size:11px;color:var(--text-muted);font-weight:400">該当するものを選択</span>
+      </div>
+
+      <!-- 割引チェックボックス群（動的生成） -->
+      <div class="field">
+        <label class="field-label">適用できる割引</label>
+        <p style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">該当するものをすべて選択してください（併用不可は自動調整します）</p>
+        <div id="discount-chips-wrap" style="display:flex;flex-wrap:wrap;gap:8px;">
+          <!-- JSで動的に生成 -->
+        </div>
+        <div id="discount-conflict-msg" style="display:none;margin-top:8px;padding:10px 12px;background:#fff9e6;border:1.5px solid var(--accent);border-radius:8px;font-size:12px;color:#7a5000;">
+        </div>
       </div>
     </div>
 
@@ -979,9 +1016,17 @@ body {
       <div class="result-price" id="result-price-text">—</div>
       <div class="result-note">※あくまでも概算の目安です。正確な料金は個別にご案内いたします。</div>
 
+      <!-- バイク系詳細内訳（動的表示） -->
+      <div id="result-breakdown" style="display:none;margin-bottom:16px;">
+        <div style="background:#f7f9f5;border-radius:10px;padding:14px 16px;border:1px solid var(--border);font-size:13px;text-align:left;">
+          <div style="font-weight:700;color:var(--primary-dark);margin-bottom:10px;">💡 料金内訳</div>
+          <div id="breakdown-content"></div>
+        </div>
+      </div>
+
       <div class="result-message">
         概算料金の目安が表示されました。<br><br>
-        ただし、時期やキャンペーン、ご紹介割引、ご家族割引、複数名入所割引などにより、<strong>実際はさらにお安くご案内できる場合があります。</strong><br><br>
+        ただし、時期やキャンペーン、ご紹介割引、ご家族割引などにより、<strong>実際はさらにお安くご案内できる場合があります。</strong><br><br>
         加古川教習所では、担当者よりキャンペーン内容を含めて個別にご案内しております。
       </div>
 
@@ -1027,35 +1072,17 @@ body {
    ============================================================ */
 
 // ---- Google Apps Script WebアプリURL ----
-// GASをデプロイした後、ここにURLを貼り付けてください
 const GAS_URL = "https://script.google.com/macros/s/AKfycbwmA8QWpoAKpBPPXlEvJMxrYdVTKLQpSo6HIMcWoT-p6FALobjdEffbZiJ9l-OkgLcI/exec";
 
 // ---- LINE URL ----
 const LINE_URL = "https://lin.ee/UnqfgBe";
 
-// ---- 概算料金テーブル（令和7年4月1日改定版）----
-// 料金表の実費をそのまま反映。変更時はここだけ修正。
-// 単位: 円
-//
-// 【AT車 チャレンジコース】
-// 基本料金: 294,600円（全年齢共通）
-// スタンプ割(延長): 29,460円（延長保証）
-// 年齢別追加補講料:
-//   〜22歳: 0円（学割適用）
-//   23〜30歳: 0円（スタンプ割のみ）
-//   31〜35歳: 16,500円追加（15時間以下）
-//   36〜40歳: 22,000円追加（15時間以下）
-//   41〜45歳: 33,000円追加（15時間以下）
-//   46〜50歳: 55,000円追加（20時間以下）
-//   51〜59歳: 110,000円追加（30時間以下）
-//
-// 【MT車 チャレンジコース】
-// 基本料金: 314,100円（全年齢共通）
-// 一律 314,100〜356,510円
+/* ============================================================
+   料金テーブル（令和7年4月1日改定版）
+   ============================================================ */
 
+// 【車AT チャレンジコース】年齢別
 const PRICE_TABLE_AT = {
-  // 年齢上限: { min, max } の形式
-  // min = 基本料金のみ, max = 基本+スタンプ割+補講料フル
   22: { min: 294600, max: 335060, label: "〜22歳（学割適用）" },
   30: { min: 294600, max: 346060, label: "23〜30歳" },
   35: { min: 294600, max: 351560, label: "31〜35歳" },
@@ -1065,96 +1092,230 @@ const PRICE_TABLE_AT = {
   59: { min: 294600, max: 445060, label: "51〜59歳" },
 };
 
+// 【車MT チャレンジコース】一律
 const PRICE_TABLE_MT = {
-  // MT車は年齢に関係なく一律
   all: { min: 314100, max: 356510, label: "MT車 チャレンジコース" },
 };
 
-// ---- バイク・中型免許 料金テーブル（令和7年4月1日改定版）----
-// 画像の料金表より合計金額を反映
-// min=基本(審査料なし想定の下限), max=合計(スタンプ割含む上限)
-const PRICE_TABLE_OTHER = {
+// 【バイク系】取得希望免許 × 所持免許 → 基本料金
+const BIKE_PRICE_TABLE = {
+  "普通自動二輪MT": {
+    "免なし":         156530,
+    "普通・中型・大型": 108570,
+  },
+  "普通自動二輪AT": {
+    "免なし":         151910,
+    "普通・中型・大型": 96250,
+  },
+  "小型二輪MT": {
+    "なし・原付":   136510,
+    "普通〜大型":   82610,
+  },
+  "小型二輪AT限定": {
+    "なし・原付": 123310,
+    "四輪":       73810,
+  },
+  "大型自動二輪": {
+    "普通・中型・大型": 202290,
+    "普通二輪MT":      99110,
+    "普通二輪AT":      120230,
+    "小型二輪MT":      141350,
+    "小型二輪AT":      162470,
+  },
+};
 
-  // 【普通二輪 MT】合計 172,410円（1年限定）
-  "中型バイク": {
-    min: 172410, max: 172410,
-    note: "普通二輪車MT（1年限）",
-    detail: "普通自動二輪 MT・1年限定"
-  },
+// 所持免許選択肢（取得希望免許ごと）
+const BIKE_LICENSE_OPTIONS = {
+  "普通自動二輪MT":  ["免なし", "普通・中型・大型"],
+  "普通自動二輪AT":  ["免なし", "普通・中型・大型"],
+  "小型二輪MT":      ["なし・原付", "普通〜大型"],
+  "小型二輪AT限定":  ["なし・原付", "四輪"],
+  "大型自動二輪":    ["普通・中型・大型", "普通二輪MT", "普通二輪AT", "小型二輪MT", "小型二輪AT"],
+};
 
-  // 【大型二輪 AT含む】合計 307,050円（5年限）
-  "大型バイク": {
-    min: 307050, max: 307050,
-    note: "大型二輪（AT含む・5年限）",
-    detail: "大型自動二輪（AT限定含む）"
-  },
+// オプション料金
+const BIKE_OPTION_TABLE = {
+  "普通自動二輪MT":  { "レディースパック": 14190 },
+  "普通自動二輪AT":  { "レディースパック": 14190 },
+  "小型二輪MT":      { "レディースパック": 14190 },
+  "小型二輪AT限定":  { "レディースパック": 14190 },
+  "大型自動二輪":    { "レディースパック": 22440 },
+};
 
-  // 【普通二輪 AT】合計 205,410円（1年限）
-  "小型バイク": {
-    min: 205410, max: 205410,
-    note: "普通二輪車AT（1年限）",
-    detail: "普通自動二輪 AT限定・1年限定"
-  },
+// 割引テーブル（取得希望免許ごと）
+const BIKE_DISCOUNT_TABLE = {
+  "普通自動二輪MT": { "学割": 5500, "紹介割": 5500, "家族割": 5500, "卒割": 11000, "LINE割": 2200, "応急免除": 5445 },
+  "普通自動二輪AT": { "学割": 5500, "紹介割": 5500, "家族割": 5500, "卒割": 11000, "LINE割": 2200, "応急免除": 5445 },
+  "小型二輪MT":     { "学割": 5500, "紹介割": 5500, "卒割": 5500, "LINE割": 2200 },
+  "小型二輪AT限定": { "学割": 5500, "紹介割": 5500, "卒割": 5500, "LINE割": 2200 },
+  "大型自動二輪":   { "学割": 5500, "紹介割": 5500, "家族割": 5500, "卒割": 11000, "LINE割": 2200 },
+};
 
-  // 【中型免許 5t限定解除〜限定なし】
-  // 現在の免許状況により異なるため幅を持たせて表示
-  // 9時限審査: 137,210 / 11時限: 161,190 / 15時限(普通車から): 202,550
-  "中型免許": {
-    min: 137210, max: 202550,
-    note: "現在の免許内容により変わります",
-    detail: "9時限〜15時限審査（保有免許によって異なります）"
-  },
+// 割引の説明文
+const DISCOUNT_NOTES = {
+  "学割":   "",
+  "紹介割": "※卒割と併用不可",
+  "家族割": "※卒割と併用不可",
+  "卒割":   "卒業経過年数不問",
+  "LINE割": "お友達登録時のみ",
+  "応急免除": "応急救護免除対象者のみ",
+};
 
-  // ペーパードライバー・その他は概算
-  "ペーパードライバー講習": {
-    min: 15000, max: 40000,
-    note: "担当者にご確認ください",
-    detail: "ペーパードライバー向け講習"
-  },
-  "その他": {
-    min: 50000, max: 400000,
-    note: "担当者にご確認ください",
-    detail: "詳細は担当者にご案内します"
-  },
+// 併用不可ルール: 卒割 ↔ 紹介割・家族割
+const INCOMPATIBLE_DISCOUNTS = [
+  ["卒割", "紹介割"],
+  ["卒割", "家族割"],
+];
+
+// 中型免許・ペーパードライバー等（概算のみ）
+const OTHER_PRICE_TABLE = {
+  "中型免許":           { min: 137210, max: 202550, detail: "保有免許により異なります（9〜15時限審査）" },
+  "ペーパードライバー講習": { min: 15000,  max: 40000,  detail: "担当者にご確認ください" },
+  "その他":             { min: 50000,  max: 400000, detail: "担当者にご確認ください" },
 };
 
 /* ============================================================
    状態管理
    ============================================================ */
 const state = {
-  area: "",
-  currentLicense: "",
-  graduate: "",
-  source: "",
-  targetLicense: "",
-  introducer: "",
-  family: "",
-  group: ""
+  area: "", currentLicense: "", graduate: "", source: "",
+  targetLicense: "", introducer: "", family: "", group: "",
+  bikeOwnedLicense: "",   // バイク系: 所持免許
+  ladiesPack: "なし",      // バイク系: レディースパック
+  selectedDiscounts: [],   // バイク系: 選択した割引
 };
 
-// 送信済みフラグ（二重送信防止）
+const BIKE_TARGETS = ["普通自動二輪MT","普通自動二輪AT","小型二輪MT","小型二輪AT限定","大型自動二輪"];
+
 let submitted = false;
 
 /* ============================================================
-   チップ選択処理
+   取得希望免許変更時の処理
    ============================================================ */
-function selectChip(key, el) {
-  // 同グループの選択解除
-  const groupId = "chips-" + camelToKebab(key);
-  const group = document.getElementById(groupId);
-  if (group) {
-    group.querySelectorAll(".chip").forEach(c => c.classList.remove("selected"));
+function onTargetLicenseChange(target) {
+  const isBike = BIKE_TARGETS.includes(target);
+
+  // バイク専用セクションの表示切り替え
+  document.getElementById("section-bike-license").style.display = isBike ? "block" : "none";
+  document.getElementById("section-bike-options").style.display = isBike ? "block" : "none";
+
+  if (isBike) {
+    // 所持免許チップを動的生成
+    renderBikeLicenseChips(target);
+    // 割引チップを動的生成
+    renderDiscountChips(target);
+    // リセット
+    state.bikeOwnedLicense = "";
+    state.ladiesPack = "なし";
+    state.selectedDiscounts = [];
+    // レディースパックのチップもリセット
+    document.querySelectorAll("#chips-ladies-pack .chip").forEach(c => c.classList.remove("selected"));
+  }
+}
+
+function renderBikeLicenseChips(target) {
+  const options = BIKE_LICENSE_OPTIONS[target] || [];
+  const wrap = document.getElementById("chips-bike-owned-license");
+  wrap.innerHTML = options.map(opt => `
+    <button type="button" class="chip" data-value="${opt}" onclick="selectBikeOwnedLicense('${opt}',this)">
+      <span class="chip-check">✓</span>${opt}
+    </button>
+  `).join("");
+}
+
+function renderDiscountChips(target) {
+  const discounts = BIKE_DISCOUNT_TABLE[target] || {};
+  const wrap = document.getElementById("discount-chips-wrap");
+  wrap.innerHTML = Object.entries(discounts).map(([name, amount]) => `
+    <button type="button" class="chip" data-value="${name}" onclick="toggleDiscount('${name}',this)"
+      style="padding:10px 16px;">
+      <span class="chip-check">✓</span>
+      <span>${name}${DISCOUNT_NOTES[name] ? `<span style="font-size:10px;opacity:0.7;display:block;">${DISCOUNT_NOTES[name]}</span>` : ""}</span>
+    </button>
+  `).join("");
+}
+
+/* ============================================================
+   バイク系の選択処理
+   ============================================================ */
+function selectBikeOwnedLicense(val, el) {
+  document.querySelectorAll("#chips-bike-owned-license .chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+  state.bikeOwnedLicense = val;
+  document.getElementById("err-bike-owned-license").style.display = "none";
+  updateProgress();
+}
+
+function selectBikeOption(key, val, el) {
+  const groupId = key === "ladiesPack" ? "chips-ladies-pack" : null;
+  if (groupId) {
+    document.querySelectorAll(`#${groupId} .chip`).forEach(c => c.classList.remove("selected"));
   }
   el.classList.add("selected");
+  state[key] = val;
+}
+
+function toggleDiscount(name, el) {
+  if (el.classList.contains("selected")) {
+    el.classList.remove("selected");
+    state.selectedDiscounts = state.selectedDiscounts.filter(d => d !== name);
+  } else {
+    el.classList.add("selected");
+    state.selectedDiscounts.push(name);
+  }
+  checkDiscountConflict();
+  updateProgress();
+}
+
+function checkDiscountConflict() {
+  const selected = state.selectedDiscounts;
+  const conflicts = [];
+  for (const [a, b] of INCOMPATIBLE_DISCOUNTS) {
+    if (selected.includes(a) && selected.includes(b)) {
+      conflicts.push(`「${a}」と「${b}」は併用できません（金額が大きい方を自動適用します）`);
+    }
+  }
+  const msgEl = document.getElementById("discount-conflict-msg");
+  if (conflicts.length > 0) {
+    msgEl.style.display = "block";
+    msgEl.innerHTML = "⚠️ " + conflicts.join("<br>⚠️ ");
+  } else {
+    msgEl.style.display = "none";
+  }
+}
+
+// 併用不可時は金額の大きい方だけを適用して返す
+function resolveDiscounts(target, selected) {
+  const discountTable = BIKE_DISCOUNT_TABLE[target] || {};
+  let active = [...selected];
+
+  for (const [a, b] of INCOMPATIBLE_DISCOUNTS) {
+    if (active.includes(a) && active.includes(b)) {
+      const amtA = discountTable[a] || 0;
+      const amtB = discountTable[b] || 0;
+      // 金額が小さい方を除外
+      if (amtA >= amtB) {
+        active = active.filter(d => d !== b);
+      } else {
+        active = active.filter(d => d !== a);
+      }
+    }
+  }
+  return active;
+}
+
+/* ============================================================
+   チップ選択処理（共通）
+   ============================================================ */
+function selectChip(key, el) {
+  const groupId = "chips-" + camelToKebab(key);
+  const group = document.getElementById(groupId);
+  if (group) group.querySelectorAll(".chip").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
   state[key] = el.dataset.value;
-
-  // 「その他」が選ばれたら入力欄を表示
   handleOtherInput(key, el.dataset.value === "その他");
-
-  // エラーをクリア
   const errEl = document.getElementById("err-" + camelToKebab(key));
   if (errEl) errEl.style.display = "none";
-
   updateProgress();
 }
 
@@ -1163,24 +1324,15 @@ function camelToKebab(str) {
 }
 
 function handleOtherInput(key, show) {
-  const wrapIds = {
-    area: "other-area-wrap",
-    currentLicense: "other-license-wrap",
-    source: "other-source-wrap",
-    targetLicense: "other-target-wrap"
-  };
+  const wrapIds = { area: "other-area-wrap", currentLicense: "other-license-wrap", source: "other-source-wrap", targetLicense: "other-target-wrap" };
   const id = wrapIds[key];
-  if (id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle("visible", show);
-  }
+  if (id) { const el = document.getElementById(id); if (el) el.classList.toggle("visible", show); }
 }
 
 /* ============================================================
-   進捗バー更新
+   進捗バー
    ============================================================ */
-const REQUIRED_FIELDS = ["name","age","tel","area","currentLicense","targetLicense"];
-const ALL_FIELDS      = ["name","age","tel","area","currentLicense","graduate","source","targetLicense","introducer","family","group"];
+const ALL_FIELDS = ["name","age","tel","area","currentLicense","graduate","source","targetLicense","introducer","family","group"];
 
 function updateProgress() {
   let filled = 0;
@@ -1202,7 +1354,6 @@ function updateProgress() {
   document.getElementById("progress-text").textContent = pct === 100 ? "入力完了！" : `入力中 (${filled}/${ALL_FIELDS.length})`;
 }
 
-// テキスト入力でも進捗更新
 ["input-name","input-age","input-tel"].forEach(id => {
   document.getElementById(id).addEventListener("input", updateProgress);
 });
@@ -1213,29 +1364,26 @@ function updateProgress() {
 function validateRequired() {
   let ok = true;
 
-  // お名前
   const name = document.getElementById("input-name").value.trim();
   setFieldError("name", !name, document.getElementById("input-name"));
   if (!name) ok = false;
 
-  // 年齢
   const age = document.getElementById("input-age").value.trim();
   setFieldError("age", !age, document.getElementById("input-age"));
   if (!age) ok = false;
 
-  // 電話番号
   const tel = document.getElementById("input-tel").value.trim();
   setFieldError("tel", !tel, document.getElementById("input-tel"));
   if (!tel) ok = false;
 
-  // 地域
-  if (!state.area) { showError("err-area"); ok = false; }
-
-  // 現在の免許
-  if (!state.currentLicense) { showError("err-current-license"); ok = false; }
-
-  // 取得希望免許
+  if (!state.area)          { showError("err-area"); ok = false; }
+  if (!state.currentLicense){ showError("err-current-license"); ok = false; }
   if (!state.targetLicense) { showError("err-target-license"); ok = false; }
+
+  // バイク系：所持免許も必須
+  if (BIKE_TARGETS.includes(state.targetLicense) && !state.bikeOwnedLicense) {
+    showError("err-bike-owned-license"); ok = false;
+  }
 
   return ok;
 }
@@ -1252,56 +1400,65 @@ function showError(id) {
 }
 
 /* ============================================================
-   概算料金計算（年齢別・AT/MT対応）
+   料金計算
    ============================================================ */
+function formatPrice(num) {
+  return num.toLocaleString("ja-JP");
+}
+
 function calcPrice(targetLicense, currentLicense, age) {
   const ageNum = parseInt(age, 10) || 0;
 
-  // 車AT：年齢別料金
+  // 車AT
   if (targetLicense === "車AT") {
-    const brackets = [22, 30, 35, 40, 45, 50, 59];
+    const brackets = [22,30,35,40,45,50,59];
     for (const limit of brackets) {
       if (ageNum <= limit) {
         const row = PRICE_TABLE_AT[limit];
-        return {
-          min: row.min,
-          max: row.max,
-          ageLabel: row.label,
-          note: "普通自動車AT限定（チャレンジコース）"
-        };
+        return { type: "range", min: row.min, max: row.max, label: row.label };
       }
     }
-    // 60歳以上は担当者確認
-    return {
-      min: 294600, max: 500000,
-      ageLabel: "60歳以上",
-      note: "担当者にご確認ください"
-    };
+    return { type: "range", min: 294600, max: 500000, label: "60歳以上" };
   }
 
-  // 車MT：一律
+  // 車MT
   if (targetLicense === "車MT") {
     const row = PRICE_TABLE_MT.all;
+    return { type: "range", min: row.min, max: row.max, label: row.label };
+  }
+
+  // バイク系（所持免許別の正確な料金）
+  if (BIKE_TARGETS.includes(targetLicense)) {
+    const base = (BIKE_PRICE_TABLE[targetLicense] || {})[state.bikeOwnedLicense] || 0;
+    const optionAmt = state.ladiesPack === "あり"
+      ? ((BIKE_OPTION_TABLE[targetLicense] || {})["レディースパック"] || 0)
+      : 0;
+
+    // 割引（併用不可を解決）
+    const activeDiscounts = resolveDiscounts(targetLicense, state.selectedDiscounts);
+    const discountTable   = BIKE_DISCOUNT_TABLE[targetLicense] || {};
+    let discountTotal = 0;
+    const discountLines = [];
+    activeDiscounts.forEach(name => {
+      const amt = discountTable[name] || 0;
+      discountTotal += amt;
+      discountLines.push({ name, amt });
+    });
+
+    // 除外された割引
+    const excluded = state.selectedDiscounts.filter(d => !activeDiscounts.includes(d));
+
+    const total = Math.max(0, base + optionAmt - discountTotal);
     return {
-      min: row.min,
-      max: row.max,
-      ageLabel: row.label,
-      note: "普通自動車MT（チャレンジコース）"
+      type: "bike",
+      base, optionAmt, discountLines, discountTotal, total,
+      excluded, targetLicense, ownedLicense: state.bikeOwnedLicense,
     };
   }
 
-  // バイク・その他
-  const other = PRICE_TABLE_OTHER[targetLicense] || PRICE_TABLE_OTHER["その他"];
-  return {
-    min: other.min,
-    max: other.max,
-    ageLabel: other.detail || "",
-    note: other.note || "詳細は担当者にご確認ください"
-  };
-}
-
-function formatPrice(num) {
-  return num.toLocaleString("ja-JP");
+  // その他
+  const other = OTHER_PRICE_TABLE[targetLicense] || OTHER_PRICE_TABLE["その他"];
+  return { type: "range", min: other.min, max: other.max, label: other.detail };
 }
 
 /* ============================================================
@@ -1309,34 +1466,95 @@ function formatPrice(num) {
    ============================================================ */
 function runDiagnosis() {
   if (!validateRequired()) {
-    // 最初のエラー箇所へスクロール
     const firstErr = document.querySelector(".error-msg[style='display: flex;']") ||
                      document.querySelector(".field-input.error");
     if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
     return;
   }
 
-  // 料金計算（年齢を渡す）
-  const age         = document.getElementById("input-age").value.trim();
-  const priceResult = calcPrice(state.targetLicense, state.currentLicense, age);
-  const priceText   = `${formatPrice(priceResult.min)}円 〜 ${formatPrice(priceResult.max)}円程度`;
+  const age    = document.getElementById("input-age").value.trim();
 
-  // 結果表示（年齢ラベルも表示）
-  const ageLine = priceResult.ageLabel
-    ? `<div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${priceResult.ageLabel}</div>`
-    : "";
-  const isSamePrice = priceResult.min === priceResult.max;
-  const priceHTML = isSamePrice
-    ? `<span class="unit">約</span> ${formatPrice(priceResult.min)}<span class="unit">円</span>`
-    : `<span class="unit">約</span> ${formatPrice(priceResult.min)}<span class="unit">円〜</span>${formatPrice(priceResult.max)}<span class="unit">円程度</span>`;
-  document.getElementById("result-price-text").innerHTML = ageLine + priceHTML;
+  // 学割：22歳以下は自動適用（職業不問）
+  if (BIKE_TARGETS.includes(state.targetLicense)) {
+    const ageNum = parseInt(age, 10) || 0;
+    const discountTable = BIKE_DISCOUNT_TABLE[state.targetLicense] || {};
+    if (ageNum <= 22 && "学割" in discountTable && !state.selectedDiscounts.includes("学割")) {
+      state.selectedDiscounts.push("学割");
+      // チップも選択状態に
+      document.querySelectorAll("#discount-chips-wrap .chip").forEach(chip => {
+        if (chip.dataset.value === "学割") chip.classList.add("selected");
+      });
+    }
+  }
 
-  // 結果エリア表示
+  const result = calcPrice(state.targetLicense, state.currentLicense, age);
+
+  let priceText = "";
+  let priceHTML = "";
+
+  if (result.type === "bike") {
+    // バイク系：詳細内訳表示
+    priceText = `${formatPrice(result.total)}円`;
+    priceHTML = `<span class="unit">約</span> ${formatPrice(result.total)}<span class="unit">円</span>`;
+
+    // 内訳HTML
+    let breakdown = `
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+        <span>取得希望免許</span><span style="font-weight:700;">${result.targetLicense}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+        <span>所持免許</span><span style="font-weight:700;">${result.ownedLicense}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+        <span>基本料金</span><span style="font-weight:700;">${formatPrice(result.base)}円</span>
+      </div>`;
+
+    if (result.optionAmt > 0) {
+      breakdown += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+        <span>レディースパック</span><span style="color:var(--primary-dark);font-weight:700;">+${formatPrice(result.optionAmt)}円</span>
+      </div>`;
+    }
+
+    result.discountLines.forEach(d => {
+      breakdown += `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);">
+        <span>${d.name}</span><span style="color:#2e7d32;font-weight:700;">適用</span>
+      </div>`;
+    });
+
+    if (result.excluded.length > 0) {
+      breakdown += `<div style="padding:6px 0;font-size:11px;color:var(--text-muted);">
+        ⚠️ 併用不可のため除外: ${result.excluded.join("・")}
+      </div>`;
+    }
+
+    breakdown += `<div style="display:flex;justify-content:space-between;padding:8px 0;margin-top:4px;border-top:2px solid var(--primary);">
+      <span style="font-weight:900;">概算合計</span>
+      <span style="font-weight:900;color:var(--primary-dark);font-size:16px;">${formatPrice(result.total)}円</span>
+    </div>
+    <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+      ※キャンペーンや時期により変動するため、最終金額は担当者よりご案内します
+    </div>`;
+
+    document.getElementById("breakdown-content").innerHTML = breakdown;
+    document.getElementById("result-breakdown").style.display = "block";
+
+  } else {
+    // 車・その他：レンジ表示
+    const isSame = result.min === result.max;
+    priceText = isSame ? `約${formatPrice(result.min)}円` : `${formatPrice(result.min)}円〜${formatPrice(result.max)}円程度`;
+    const labelLine = result.label ? `<div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">${result.label}</div>` : "";
+    priceHTML = isSame
+      ? labelLine + `<span class="unit">約</span> ${formatPrice(result.min)}<span class="unit">円</span>`
+      : labelLine + `<span class="unit">約</span> ${formatPrice(result.min)}<span class="unit">円〜</span>${formatPrice(result.max)}<span class="unit">円程度</span>`;
+    document.getElementById("result-breakdown").style.display = "none";
+  }
+
+  document.getElementById("result-price-text").innerHTML = priceHTML;
+
   const resultSec = document.getElementById("result-section");
   resultSec.style.display = "block";
   resultSec.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  // データ収集してスプレッドシートへ送信
   sendData(priceText);
 }
 
@@ -1347,7 +1565,6 @@ async function sendData(priceText) {
   if (submitted) return;
   submitted = true;
 
-  // ローディング表示
   document.getElementById("loading").classList.add("active");
   document.getElementById("btn-diagnose").disabled = true;
 
@@ -1356,50 +1573,44 @@ async function sendData(priceText) {
     name:          document.getElementById("input-name").value.trim(),
     age:           document.getElementById("input-age").value.trim(),
     tel:           document.getElementById("input-tel").value.trim(),
-    area:          state.area === "その他"
-                    ? (document.getElementById("other-area").value.trim() || "その他")
-                    : state.area,
-    currentLicense: state.currentLicense === "その他"
-                    ? (document.getElementById("other-license").value.trim() || "その他")
-                    : state.currentLicense,
+    area:          state.area === "その他" ? (document.getElementById("other-area").value.trim() || "その他") : state.area,
+    currentLicense: state.currentLicense === "その他" ? (document.getElementById("other-license").value.trim() || "その他") : state.currentLicense,
     graduate:      state.graduate,
-    source:        state.source === "その他"
-                    ? (document.getElementById("other-source").value.trim() || "その他")
-                    : state.source,
-    targetLicense: state.targetLicense === "その他"
-                    ? (document.getElementById("other-target").value.trim() || "その他")
-                    : state.targetLicense,
+    source:        state.source === "その他" ? (document.getElementById("other-source").value.trim() || "その他") : state.source,
+    targetLicense: state.targetLicense,
+    bikeOwnedLicense: state.bikeOwnedLicense || "—",
+    ladiesPack:    state.ladiesPack,
+    discounts:     state.selectedDiscounts.join("・") || "なし",
     introducer:    state.introducer,
     family:        state.family,
     group:         state.group,
-    estimatedPrice: priceText
+    estimatedPrice: priceText,
   };
 
   try {
     await fetch(GAS_URL, {
       method: "POST",
-      mode: "no-cors", // GASはno-corsで送信
+      mode: "no-cors",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
-    // 送信成功 → 完了画面表示
     setTimeout(() => {
       document.getElementById("loading").classList.remove("active");
-      document.getElementById("form-section").style.display  = "none";
+      document.getElementById("form-section").style.display   = "none";
       document.getElementById("result-section").style.display = "none";
       document.getElementById("complete-section").style.display = "block";
       document.getElementById("complete-section").scrollIntoView({ behavior: "smooth" });
     }, 1200);
 
   } catch (e) {
-    // エラー時も結果は表示（送信失敗でも診断結果は見せる）
     document.getElementById("loading").classList.remove("active");
     console.error("送信エラー:", e);
-    submitted = false; // 再送信可能に
+    submitted = false;
     document.getElementById("btn-diagnose").disabled = false;
   }
 }
 </script>
+
 </body>
 </html>
