@@ -1591,6 +1591,10 @@ function runDiagnosis() {
     return;
   }
 
+  // チャット初期化フラグをリセット（再診断時も動くように）
+  chatInitialized = false;
+  chatHistory = [];
+
   const age    = document.getElementById("input-age").value.trim();
 
   // 学割：22歳以下は自動適用（職業不問）
@@ -1674,8 +1678,8 @@ function runDiagnosis() {
   resultSec.style.display = "block";
   resultSec.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  // AIチャット初期化（料金診断後に起動）
-  setTimeout(() => initChat(priceText), 800);
+  // AIチャット即時初期化（sendDataとは独立して動かす）
+  initChat(priceText);
 
   sendData(priceText);
 }
