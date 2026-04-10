@@ -1,82 +1,915 @@
-const SHEET_NAME   = '申し込み';
-const NOTIFY_EMAIL = 'nakaotaichi.kds@gmail.com';
-const LINE_TOKEN   = 'Eg5ISJPRWpDHYKq23bbVPgAiyJe62WhymvzlU2oU0VPtjtrgzIWoB7yTjMC2dkNzuYn3YlW7ndQ7Asc4yEvKXXJof7GX/4FfkgNS39VzQLDVV+70VYwI9ttGswvshOExB1dfI5wJFekO3z8Oy/4vRQdB04t89/1O/w1cDnyilFU=';
-const LINE_USER_ID = 'Ud764c6c1ef232902f00721a5923c936e';
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>かんたん料金診断 | 加古川自動車教習所</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0D2137; --teal:#0A8A6E; --teal-l:#0EA882;
+  --amber:#C97D0A; --red:#DC2626;
+  --line:#06C755; --line-d:#059444;
+  --white:#fff; --g1:#F6F8FA; --g2:#EBF0F5; --g3:#CBD5E0;
+  --text:#1A2B3C; --muted:#4A6077;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--g1);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh;padding-bottom:80px}
 
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    const sheet = SpreadsheetApp.getActiveSpreadsheet()
-                                .getSheetByName(SHEET_NAME);
+/* ── HEADER ── */
+.hdr{background:var(--navy);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr-logo{color:#fff;font-size:13px;font-weight:700}
+.hdr-badge{background:rgba(10,138,110,.3);color:#5DDDBB;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;border:1px solid rgba(93,221,187,.4)}
 
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        '受付日時','お名前','年齢','地域','電話番号','取得免許','所持免許',
-        '営業所','来店日','来店時間','紹介','家族割','人数','きっかけ'
-      ]);
+/* ── HERO ── */
+.hero{background:var(--navy);padding:28px 20px 36px;position:relative;overflow:hidden;text-align:center}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:260px;height:260px;border-radius:50%;background:rgba(10,138,110,.15)}
+.hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;border-radius:50%;background:rgba(201,125,10,.1)}
+.hero-eyebrow{font-size:11px;font-weight:700;color:#5DDDBB;letter-spacing:.15em;margin-bottom:10px}
+.hero-title{font-size:clamp(22px,6vw,28px);font-weight:900;color:#fff;line-height:1.35;margin-bottom:12px}
+.hero-title span{color:#6FDDBB}
+.hero-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.hero-badge-item{background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);font-size:11px;font-weight:600;padding:4px 12px;border-radius:100px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.6);line-height:1.65}
+
+/* ── PROGRESS ── */
+.prog-wrap{padding:12px 16px 0;background:var(--navy)}
+.prog-bar-bg{height:4px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
+.prog-bar-fill{height:100%;background:var(--teal-l);border-radius:2px;transition:width .4s ease;width:0%}
+.prog-label{font-size:11px;color:rgba(255,255,255,.5);margin-top:5px;padding-bottom:12px;text-align:right}
+
+/* ── STEP CONTAINER ── */
+.steps-wrap{padding:20px 16px 0}
+.step{display:none;animation:fadeUp .4s ease both}
+.step.active{display:block}
+
+/* ── STEP HEADER ── */
+.step-num{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.1em;margin-bottom:6px}
+.step-q{font-size:18px;font-weight:700;color:var(--navy);line-height:1.45;margin-bottom:16px}
+.step-sub{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6}
+
+/* ── CHOICE GRID ── */
+.choice-grid{display:grid;gap:10px}
+.choice-grid.col2{grid-template-columns:1fr 1fr}
+.choice-btn{background:var(--white);border:2px solid var(--g2);border-radius:14px;padding:16px 14px;text-align:left;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;width:100%;display:flex;align-items:center;gap:12px}
+.choice-btn:active{transform:scale(.97)}
+.choice-btn.selected{border-color:var(--teal);background:#F0FAF7}
+.choice-icon{font-size:22px;flex-shrink:0;width:32px;text-align:center}
+.choice-body{}
+.choice-label{font-size:14px;font-weight:700;color:var(--navy);line-height:1.3}
+.choice-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.choice-grid.col2 .choice-btn{flex-direction:column;text-align:center;align-items:center;gap:8px}
+
+/* ── NAME INPUT ── */
+.input-group{display:flex;flex-direction:column;gap:12px}
+.input-label{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px}
+.input-field{background:var(--white);border:2px solid var(--g2);border-radius:12px;padding:14px 16px;font-size:16px;font-family:'Noto Sans JP',sans-serif;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+.input-field:focus{border-color:var(--teal)}
+select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234A6077' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.input-wrap{display:flex;flex-direction:column;gap:4px}
+.input-note{font-size:11px;color:var(--muted)}
+
+/* ── NAV BUTTONS ── */
+.nav-wrap{margin-top:20px;display:flex;gap:10px}
+.btn-next{flex:1;background:var(--teal);color:#fff;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 5px 18px rgba(10,138,110,.35)}
+.btn-next:active{transform:scale(.97);box-shadow:0 2px 8px rgba(10,138,110,.2)}
+.btn-next:disabled{background:var(--g3);box-shadow:none;cursor:not-allowed}
+.btn-back{background:var(--white);color:var(--muted);border:2px solid var(--g2);border-radius:14px;padding:16px 18px;font-size:14px;font-weight:600;font-family:'Noto Sans JP',sans-serif;cursor:pointer}
+
+/* ── TRUST STRIP ── */
+.trust-strip{display:flex;justify-content:center;gap:16px;padding:14px 16px;background:var(--white);border-top:1px solid var(--g2);margin-top:16px}
+.trust-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-weight:600}
+
+/* ── RESULT PAGE ── */
+.result-page{display:none}
+.result-page.active{display:block}
+
+.result-hero{background:var(--navy);padding:28px 20px 32px;position:relative;overflow:hidden}
+.result-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:260px;height:260px;border-radius:50%;background:rgba(10,138,110,.15)}
+.result-hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;border-radius:50%;background:rgba(201,125,10,.1)}
+.rh-label{font-size:11px;font-weight:700;color:#5DDDBB;letter-spacing:.15em;margin-bottom:8px}
+.rh-name{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:4px}
+.rh-price{font-size:52px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em;margin-bottom:4px}
+.rh-price span{font-size:20px;font-weight:500;color:rgba(255,255,255,.55);margin-left:4px}
+.rh-note{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:16px}
+.cheaper-box{background:linear-gradient(90deg,#7C2D12,#C97D0A);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.cheaper-box::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06)}
+.cheaper-tag{display:inline-block;background:rgba(255,255,255,.2);color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:100px;margin-bottom:6px;letter-spacing:.06em}
+.cheaper-msg{font-size:14px;font-weight:700;color:#fff;line-height:1.55}
+.cheaper-msg span{color:#FFD580}
+
+.sec{padding:24px 16px 0}
+.sec-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';display:block;width:3px;height:18px;background:var(--teal);border-radius:2px;flex-shrink:0}
+
+/* situation tap */
+.sit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sit-btn{background:var(--white);border:1.5px solid var(--g3);border-radius:12px;padding:15px 10px;text-align:center;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent}
+.sit-btn:active{transform:scale(.96)}
+.sit-btn.active{border-color:var(--teal);background:#F0FAF7}
+.sit-icon{font-size:22px;margin-bottom:5px}
+.sit-label{font-size:13px;font-weight:700;color:var(--navy);line-height:1.3}
+.sit-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+.branch{display:none;margin-top:12px;animation:fadeUp .35s ease both}
+.branch.show{display:block}
+.branch-card{background:var(--white);border-radius:14px;padding:18px;border:1px solid var(--g2);box-shadow:0 2px 10px rgba(13,33,55,.05)}
+.bc-tag{display:inline-block;background:#EBF7F3;color:var(--teal);font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;margin-bottom:10px}
+.bc-msg{font-size:14px;line-height:1.75;color:var(--text)}
+.bc-cta{display:block;margin-top:12px;padding:14px;border-radius:12px;font-size:15px;font-weight:700;text-align:center;text-decoration:none;transition:transform .15s;color:#fff}
+.bc-cta:active{transform:scale(.97)}
+.bc-line{background:var(--line);box-shadow:0 4px 14px rgba(6,199,85,.3)}
+.bc-visit{background:var(--teal);box-shadow:0 4px 14px rgba(10,138,110,.3);margin-top:8px}
+
+/* staff */
+.staff-card{background:var(--white);border-radius:16px;padding:18px;border:1px solid var(--g2);box-shadow:0 2px 10px rgba(13,33,55,.05)}
+.staff-inner{display:flex;gap:14px;align-items:flex-start}
+.staff-photo{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--navy));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;text-align:center;line-height:1.3;border:3px solid var(--teal-l)}
+.staff-name{font-size:15px;font-weight:700;color:var(--navy)}
+.staff-role{font-size:11px;color:var(--muted);margin-bottom:8px}
+.staff-msg{font-size:13px;line-height:1.75;border-left:3px solid var(--teal);padding-left:12px}
+.staff-online{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--teal);margin-top:8px;font-weight:600}
+.staff-online::before{content:'';width:7px;height:7px;background:var(--teal);border-radius:50%;animation:pulse 1.8s ease-in-out infinite}
+
+/* phone avoid */
+.phone-avoid{background:#FFF8ED;border-left:4px solid var(--amber);border-radius:0 12px 12px 0;padding:16px;margin:24px 16px 0}
+.pa-label{font-size:11px;font-weight:700;color:var(--amber);letter-spacing:.1em;margin-bottom:6px}
+.pa-text{font-size:13.5px;color:#5A3800;line-height:1.7}
+
+/* ank-label */
+.ank-label{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:0}
+
+/* limit */
+.limit-bar{background:linear-gradient(90deg,var(--red),#B91C1C);border-radius:12px;padding:14px 16px}
+.limit-title{font-size:12px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.1em;margin-bottom:4px}
+.limit-main{font-size:16px;font-weight:700;color:#fff;line-height:1.4}
+.limit-main em{color:#FFD580;font-style:normal;font-size:22px}
+.limit-dots{display:flex;gap:5px;margin-top:8px}
+.dot{width:22px;height:8px;border-radius:2px;background:rgba(255,255,255,.25)}
+.dot.on{background:#FFD580}
+.limit-note{font-size:12px;color:rgba(255,255,255,.65);margin-top:8px;line-height:1.6}
+
+/* CTA block */
+.cta-block{padding:24px 16px 0;text-align:center}
+.cta-lead{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px}
+.cta-stack{display:flex;flex-direction:column;gap:10px}
+.cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:17px 20px;border-radius:14px;font-size:16px;font-weight:700;text-decoration:none;transition:transform .15s,box-shadow .15s;border:none;width:100%;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.cta-btn:active{transform:scale(.97)}
+.cta-sub{font-size:11px;font-weight:400;opacity:.85}
+.btn-line{background:var(--line);color:#fff;box-shadow:0 5px 18px rgba(6,199,85,.4)}
+.btn-visit{background:var(--teal);color:#fff;box-shadow:0 5px 18px rgba(10,138,110,.35)}
+.btn-info{background:var(--white);color:var(--navy);border:2px solid var(--navy)}
+.no-press{font-size:11px;color:var(--muted);margin-top:8px}
+
+/* push bar */
+.push-bar{background:var(--navy);padding:20px 16px;text-align:center;margin-top:24px}
+.push-bar p{font-size:14px;color:rgba(255,255,255,.8);line-height:1.7}
+.push-bar strong{color:#FFD580;font-size:16px;display:block;margin-bottom:4px}
+
+/* sticky */
+.sticky{position:fixed;bottom:0;left:0;right:0;background:rgba(13,33,55,.97);backdrop-filter:blur(10px);padding:10px 14px 14px;display:flex;gap:8px;z-index:999;box-shadow:0 -4px 20px rgba(0,0,0,.2)}
+.sticky a{flex:1;padding:12px 6px;border-radius:11px;font-size:12px;font-weight:700;text-decoration:none;text-align:center;color:#fff}
+.s-line{background:var(--line)}
+.s-visit{background:var(--teal)}
+.s-tel{background:transparent;border:1.5px solid rgba(255,255,255,.35);font-size:11px}
+
+.divider{height:1px;background:var(--g2);margin:24px 16px 0}
+.mt24{margin-top:24px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+
+/* ── APPLY SECTION ── */
+.apply-hero{background:linear-gradient(135deg,var(--navy) 0%,#0F3460 100%);padding:24px 16px;text-align:center;margin-top:24px}
+.apply-hero-tag{display:inline-block;background:rgba(10,138,110,.35);color:#5DDDBB;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;border:1px solid rgba(93,221,187,.4);margin-bottom:12px;letter-spacing:.1em}
+.apply-hero-title{font-size:22px;font-weight:900;color:#fff;line-height:1.4;margin-bottom:8px}
+.apply-hero-sub{font-size:13px;color:rgba(255,255,255,.7);line-height:1.65}
+.apply-notice{background:#FFF8ED;border-left:4px solid var(--amber);border-radius:0 12px 12px 0;padding:14px 16px;margin:16px 16px 0}
+.apply-notice-label{font-size:11px;font-weight:700;color:var(--amber);letter-spacing:.08em;margin-bottom:6px}
+.apply-notice ul{padding-left:16px;font-size:13.5px;color:#5A3800;line-height:1.9}
+.apply-notice ul li{margin-bottom:2px}
+/* 営業所カード */
+.office-grid{display:flex;flex-direction:column;gap:10px}
+.office-card{background:var(--white);border-radius:14px;border:2px solid var(--g2);padding:16px;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;text-align:left;width:100%}
+.office-card:active{transform:scale(.98)}
+.office-card.selected{border-color:var(--teal);background:#F0FAF7}
+.office-card.closed{opacity:.85;position:relative;cursor:not-allowed}
+.office-card.closed::after{content:'本日定休';position:absolute;top:10px;right:12px;background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px}
+.oc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.oc-name{font-size:15px;font-weight:700;color:var(--navy)}
+.oc-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px}
+.oc-badge.open{background:#CCFCE8;color:#065F46;font-weight:700}
+.oc-badge.today-close{background:#FEE2E2;color:#991B1B;font-weight:700}
+.oc-info{font-size:13px;color:var(--text);line-height:1.9;font-weight:500}
+.oc-info span{display:inline-block;margin-right:10px}
+/* 日程選択 */
+.date-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.date-btn{background:var(--white);border:2px solid var(--g2);border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;font-family:'Noto Sans JP',sans-serif}
+.date-btn:active{transform:scale(.96)}
+.date-btn.selected{border-color:var(--teal);background:#F0FAF7}
+.date-btn.unavail{opacity:.4;pointer-events:none;background:var(--g1)}
+.db-day{font-size:11px;color:var(--muted);margin-bottom:2px}
+.db-date{font-size:15px;font-weight:700;color:var(--navy)}
+.db-holi{font-size:10px;color:var(--red);margin-top:1px}
+/* 時間帯 */
+.time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.time-btn{background:var(--white);border:2px solid var(--g2);border-radius:12px;padding:13px 8px;text-align:center;cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:600;color:var(--navy)}
+.time-btn:active{transform:scale(.96)}
+.time-btn.selected{border-color:var(--teal);background:#F0FAF7;color:var(--teal)}
+/* 確認画面 */
+.confirm-card{background:var(--white);border-radius:16px;border:1px solid var(--g2);padding:20px;box-shadow:0 2px 12px rgba(13,33,55,.06)}
+.confirm-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--g2)}
+.confirm-row:last-of-type{border-bottom:none}
+.confirm-key{font-size:12px;color:var(--muted);font-weight:600;flex-shrink:0;width:80px}
+.confirm-val{font-size:14px;font-weight:700;color:var(--navy);text-align:right;flex:1}
+.apply-done{background:var(--white);border-radius:16px;padding:28px 20px;text-align:center;border:1px solid var(--g2)}
+.apply-done-icon{font-size:48px;margin-bottom:12px}
+.apply-done-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.apply-done-msg{font-size:14px;color:var(--muted);line-height:1.75}
+/* apply steps */
+.apply-step{display:none;animation:fadeUp .4s ease both}
+.apply-step.active{display:block}
+.apply-step-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.apply-step-title::before{content:'';display:block;width:3px;height:18px;background:var(--teal);border-radius:2px;flex-shrink:0}
+.apply-nav{margin-top:18px;display:flex;gap:10px}
+.btn-apply-next{flex:1;background:var(--teal);color:#fff;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;box-shadow:0 5px 18px rgba(10,138,110,.35);transition:transform .15s}
+.btn-apply-next:active{transform:scale(.97)}
+.btn-apply-next:disabled{background:var(--g3);box-shadow:none;cursor:not-allowed}
+.btn-apply-back{background:var(--white);color:var(--muted);border:2px solid var(--g2);border-radius:14px;padding:16px 18px;font-size:14px;font-weight:600;font-family:'Noto Sans JP',sans-serif;cursor:pointer}
+.apply-wrap{padding:0 16px 24px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">🚗 加古川自動車教習所</div>
+  <div class="hdr-badge">料金診断</div>
+</div>
+
+<!-- ========== 診断フォーム ========== -->
+<div id="form-page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">🚗 かんたん料金診断</div>
+    <h1 class="hero-title">3タップで<br><span>あなたの料金がわかる</span></h1>
+    <div class="hero-badges">
+      <span class="hero-badge-item">⏱ 最短30秒</span>
+      <span class="hero-badge-item">📵 電話不要</span>
+      <span class="hero-badge-item">🎁 割引も自動計算</span>
+    </div>
+    <p class="hero-sub">キャンペーン・割引適用後の<br>最安値もあわせてご案内します</p>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="prog-wrap">
+    <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+    <div class="prog-label" id="prog-label">STEP 1 / 4</div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps-wrap">
+
+    <!-- STEP 1: 取得したい免許 -->
+    <div class="step active" id="step-1">
+      <div class="step-num">STEP 1</div>
+      <div class="step-q">取得したい免許は？</div>
+      <div class="choice-grid col2">
+        <button class="choice-btn" onclick="select(this,'want','car-at')">
+          <span class="choice-icon">🚗</span>
+          <div class="choice-body"><div class="choice-label">車（AT）</div><div class="choice-sub">オートマ限定</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','car-mt')">
+          <span class="choice-icon">🚗</span>
+          <div class="choice-body"><div class="choice-label">車（MT）</div><div class="choice-sub">マニュアル</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','bike-mid')">
+          <span class="choice-icon">🏍</span>
+          <div class="choice-body"><div class="choice-label">普通二輪</div><div class="choice-sub">バイク400cc以下</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','bike-large')">
+          <span class="choice-icon">🏍</span>
+          <div class="choice-body"><div class="choice-label">大型二輪</div><div class="choice-sub">バイク大型</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','paper')">
+          <span class="choice-icon">📄</span>
+          <div class="choice-body"><div class="choice-label">ペーパー</div><div class="choice-sub">運転に自信ない</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','other')">
+          <span class="choice-icon">🚛</span>
+          <div class="choice-body"><div class="choice-label">その他</div><div class="choice-sub">中型など</div></div>
+        </button>
+      </div>
+      <div class="nav-wrap">
+        <button class="btn-next" id="next-1" disabled onclick="goStep(2)">次へ →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: 現在の免許 -->
+    <div class="step" id="step-2">
+      <div class="step-num">STEP 2</div>
+      <div class="step-q">今、免許は持っていますか？</div>
+      <div class="step-sub">所持免許によって料金が変わります</div>
+      <div class="choice-grid">
+        <button class="choice-btn" onclick="select(this,'have','none')">
+          <span class="choice-icon">🆕</span>
+          <div class="choice-body"><div class="choice-label">免許なし（初めて）</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'have','gen')">
+          <span class="choice-icon">🛵</span>
+          <div class="choice-body"><div class="choice-label">原付のみ</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'have','car-at')">
+          <span class="choice-icon">🚗</span>
+          <div class="choice-body"><div class="choice-label">普通車AT</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'have','car-mt')">
+          <span class="choice-icon">🚗</span>
+          <div class="choice-body"><div class="choice-label">普通車MT</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'have','bike')">
+          <span class="choice-icon">🏍</span>
+          <div class="choice-body"><div class="choice-label">二輪免許あり</div></div>
+        </button>
+      </div>
+      <div class="nav-wrap">
+        <button class="btn-back" onclick="goStep(1)">← 戻る</button>
+        <button class="btn-next" id="next-2" disabled onclick="goStep(3)">次へ →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: アンケート -->
+    <div class="step" id="step-3">
+      <div class="step-num">STEP 3</div>
+      <div class="step-q">かんたんアンケート</div>
+      <div class="step-sub">割引適用の参考にします</div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+
+        <div>
+          <div class="ank-label">紹介者はいますか？</div>
+          <div class="choice-grid col2" style="margin-top:8px">
+            <button class="choice-btn" onclick="ankSelect(this,'intro','yes')">
+              <span class="choice-icon">🙋</span>
+              <div class="choice-body"><div class="choice-label">あり</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'intro','no')">
+              <span class="choice-icon">✗</span>
+              <div class="choice-body"><div class="choice-label">なし</div></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="ank-label">ご家族が当校で免許を取りましたか？</div>
+          <div class="choice-grid col2" style="margin-top:8px">
+            <button class="choice-btn" onclick="ankSelect(this,'family','yes')">
+              <span class="choice-icon">👨‍👩‍👧</span>
+              <div class="choice-body"><div class="choice-label">はい</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'family','no')">
+              <span class="choice-icon">✗</span>
+              <div class="choice-body"><div class="choice-label">いいえ</div></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="ank-label">入所人数は？</div>
+          <div class="choice-grid col2" style="margin-top:8px">
+            <button class="choice-btn" onclick="ankSelect(this,'members','one')">
+              <span class="choice-icon">👤</span>
+              <div class="choice-body"><div class="choice-label">1人</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'members','two')">
+              <span class="choice-icon">👥</span>
+              <div class="choice-body"><div class="choice-label">2人以上</div></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="ank-label">当校を知ったきっかけ</div>
+          <div class="choice-grid col2" style="margin-top:8px">
+            <button class="choice-btn" onclick="ankSelect(this,'source','instagram')">
+              <span class="choice-icon">📸</span>
+              <div class="choice-body"><div class="choice-label">Instagram</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'source','tiktok')">
+              <span class="choice-icon">🎵</span>
+              <div class="choice-body"><div class="choice-label">TikTok</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'source','google')">
+              <span class="choice-icon">🔍</span>
+              <div class="choice-body"><div class="choice-label">Google</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'source','intro')">
+              <span class="choice-icon">👥</span>
+              <div class="choice-body"><div class="choice-label">紹介</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'source','hp')">
+              <span class="choice-icon">🌐</span>
+              <div class="choice-body"><div class="choice-label">ホームページ</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'source','other')">
+              <span class="choice-icon">💬</span>
+              <div class="choice-body"><div class="choice-label">その他</div></div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <div class="nav-wrap">
+        <button class="btn-back" onclick="goStep(2)">← 戻る</button>
+        <button class="btn-next" onclick="goStep(4)">次へ →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: 名前だけ -->
+    <div class="step" id="step-4">
+      <div class="step-num">STEP 4（最後）</div>
+      <div class="step-q">お名前だけ教えてください</div>
+      <div class="step-sub">担当者がキャンペーン料金を含めてご案内します。営業電話には使いません🙏</div>
+      <div class="input-group">
+        <div class="input-wrap">
+          <label class="input-label">お名前 <span style="color:var(--red);font-size:11px">必須</span></label>
+          <input class="input-field" type="text" id="input-name" placeholder="例：田中 太郎" oninput="checkName()">
+        </div>
+        <div class="input-wrap">
+          <label class="input-label">年齢 <span style="color:var(--red);font-size:11px">必須</span></label>
+          <input class="input-field" type="number" id="input-age" placeholder="例：18" min="15" max="99" oninput="checkName()">
+        </div>
+        <div class="input-wrap">
+          <label class="input-label">お住まいの地域 <span style="color:var(--red);font-size:11px">必須</span></label>
+          <select class="input-field" id="input-area" onchange="checkName()">
+            <option value="">選択してください</option>
+            <option value="加古川市">加古川市</option>
+            <option value="高砂市">高砂市</option>
+            <option value="姫路市">姫路市</option>
+            <option value="明石市">明石市</option>
+            <option value="稲美町">稲美町</option>
+            <option value="播磨町">播磨町</option>
+            <option value="三木市">三木市</option>
+            <option value="小野市">小野市</option>
+            <option value="加西市">加西市</option>
+            <option value="神戸市西区">神戸市西区</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+        <div class="input-wrap">
+          <label class="input-label">電話番号 <span style="font-size:11px;color:var(--muted);font-weight:400">（LINE連絡希望の方は不要）</span></label>
+          <input class="input-field" type="tel" id="input-tel" placeholder="例：090-0000-0000">
+          <div class="input-note">📵 電話なしでLINEのみもOKです</div>
+        </div>
+      </div>
+      <div class="nav-wrap">
+        <button class="btn-back" onclick="goStep(3)">← 戻る</button>
+        <button class="btn-next" id="next-4" disabled onclick="showResult()">料金を見る 💰</button>
+      </div>
+    </div>
+
+  </div><!-- /steps-wrap -->
+
+  <!-- TRUST -->
+  <div class="trust-strip">
+    <span class="trust-item">🔒 個人情報保護</span>
+    <span class="trust-item">📵 営業電話なし</span>
+    <span class="trust-item">🎁 割引自動適用</span>
+  </div>
+
+</div><!-- /form-page -->
+
+
+<!-- ========== 診断結果ページ ========== -->
+<div id="result-page" class="result-page">
+
+  <!-- RESULT HERO -->
+  <div class="result-hero">
+    <div class="rh-label">あなたの概算料金</div>
+    <div class="rh-name" id="r-course">普通車AT（免許なし）</div>
+    <div class="rh-price" id="r-price">298,000<span>円〜</span></div>
+    <div class="rh-note">※ 時期・キャンペーン適用前の概算</div>
+    <div class="cheaper-box">
+      <div class="cheaper-tag">⚠️ この金額が確定ではありません</div>
+      <p class="cheaper-msg"><span>あなた専用の最安プランが</span>まだ適用されていない可能性があります。担当者が個別に最安値をご案内します。</p>
+    </div>
+  </div>
+
+  <!-- APPLY CTA -->
+  <div style="padding:20px 16px 0">
+    <div style="background:linear-gradient(135deg,#0A8A6E,#0D2137);border-radius:16px;padding:22px 18px;text-align:center">
+      <div style="font-size:11px;font-weight:700;color:#5DDDBB;letter-spacing:.12em;margin-bottom:10px">✅ 次のステップ</div>
+      <div style="font-size:18px;font-weight:900;color:#fff;line-height:1.45;margin-bottom:8px">入校申し込みは<br>来店が必要です</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.65;margin-bottom:18px">書類記入あり・約15分。<br>下から営業所と日程を選んでください。</div>
+      <button onclick="document.getElementById('apply-section').scrollIntoView({behavior:'smooth',block:'start'})"
+        style="display:block;width:100%;background:#fff;color:#0A8A6E;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer">
+        📅 来店日程を選んで申し込む
+      </button>
+    </div>
+  </div>
+
+  <!-- STAFF -->
+  <div class="sec mt24">
+    <div class="sec-title">担当者からひとこと</div>
+    <div class="staff-card">
+      <div class="staff-inner">
+        <div class="staff-photo">中尾<br>担当</div>
+        <div>
+          <div class="staff-name">中尾 （入校担当）</div>
+          <div class="staff-role">加古川教習所 スタッフ</div>
+          <div class="staff-msg">「概算より安くなるケースがほとんどです。キャンペーン・割引を組み合わせた最安値を、個別にご案内します。LINEで一言もらえれば、すぐ返します。」</div>
+          <div class="staff-online">● 今すぐ返信できます</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHONE AVOID -->
+  <div class="phone-avoid">
+    <div class="pa-label">📵 知らない番号で出れなかった方へ</div>
+    <p class="pa-text">営業電話ではありません。<strong>LINEでも完全に完結できます。</strong>料金・日程・割引確認から入所手続きまで電話ゼロで進められます。</p>
+  </div>
+
+  <!-- LIMIT -->
+  <div class="sec mt24">
+    <div class="limit-bar">
+      <div class="limit-title">⚡ 今週の入校枠</div>
+      <div class="limit-main">残り <em id="r-slots">3</em> 名</div>
+      <div class="limit-dots" id="r-dots"></div>
+      <p class="limit-note">このままだと予約が埋まる可能性があります。キャンペーン料金の適用は早い方から優先です。</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-block mt24">
+    <div class="cta-lead">次のアクションを選んでください</div>
+    <div class="cta-stack">
+      <button onclick="document.getElementById('apply-section').scrollIntoView({behavior:'smooth',block:'start'})"
+        class="cta-btn btn-visit" style="border:none;font-family:inherit;cursor:pointer">
+        ✅ 申し込む <span class="cta-sub">来店日程を選ぶ</span>
+      </button>
+      <a href="https://lin.ee/UnqfgBe" class="cta-btn btn-line">💬 LINEで相談する <span class="cta-sub">電話なし・今すぐOK</span></a>
+      <a href="https://lin.ee/UnqfgBe" class="cta-btn btn-info">💰 料金だけ確認する <span class="cta-sub" style="color:var(--muted)">LINEで1分</span></a>
+    </div>
+    <p class="no-press">比較中・迷い中でも大丈夫。来ていただくだけでOKです。</p>
+  </div>
+
+  <!-- PUSH -->
+  <div class="push-bar">
+    <p><strong>今動いた人が一番安く取れます。</strong>キャンペーン料金は先着順。LINEで1分相談するだけで最安プランをご案内します。</p>
+  </div>
+
+
+  <!-- ════ 申し込みセクション ════ -->
+  <div id="apply-section">
+
+    <!-- ヒーロー -->
+    <div class="apply-hero">
+      <div class="apply-hero-tag">✅ 申し込む</div>
+      <div class="apply-hero-title">入校申し込みは<br>必ず来店が必要です</div>
+      <div class="apply-hero-sub">書類記入がございます。<br>所要時間は約15分です。</div>
+    </div>
+
+    <!-- 注意書き -->
+    <div class="apply-notice">
+      <div class="apply-notice-label">📋 来店時にご準備ください</div>
+      <ul>
+        <li>本人確認書類（免許証・学生証など）</li>
+        <li>印鑑（シャチハタ不可）</li>
+        <li>入学金・費用は本社でのお支払いとなります（営業所ではお受けできません）</li>
+        <li>眼鏡・コンタクト（視力矯正の方）</li>
+        <li>住民票（本籍地記載・マイナンバー記載なし）</li>
+      </ul>
+    </div>
+
+    <div class="apply-wrap">
+
+      <!-- STEP A: 営業所選択 -->
+      <div class="apply-step active" id="as-1">
+        <div class="apply-step-title" style="margin-top:20px">来店する営業所を選んでください</div>
+        <div class="office-grid" id="office-grid"></div>
+        <div class="apply-nav">
+          <button class="btn-apply-next" id="anext-1" disabled onclick="applyStep(2)">次へ：日程を選ぶ →</button>
+        </div>
+      </div>
+
+      <!-- STEP B: 日程選択 -->
+      <div class="apply-step" id="as-2">
+        <div class="apply-step-title" style="margin-top:20px">来店日を選んでください</div>
+        <div class="date-grid" id="date-grid"></div>
+        <div class="apply-nav">
+          <button class="btn-apply-back" onclick="applyStep(1)">← 戻る</button>
+          <button class="btn-apply-next" id="anext-2" disabled onclick="applyStep(3)">次へ：時間を選ぶ →</button>
+        </div>
+      </div>
+
+      <!-- STEP C: 時間選択 -->
+      <div class="apply-step" id="as-3">
+        <div class="apply-step-title" style="margin-top:20px">来店時間を選んでください</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">営業時間：13:00〜18:00</p>
+        <div class="time-grid" id="time-grid"></div>
+        <div class="apply-nav">
+          <button class="btn-apply-back" onclick="applyStep(2)">← 戻る</button>
+          <button class="btn-apply-next" id="anext-3" disabled onclick="applyStep(4)">次へ：確認する →</button>
+        </div>
+      </div>
+
+      <!-- STEP D: 確認 -->
+      <div class="apply-step" id="as-4">
+        <div class="apply-step-title" style="margin-top:20px">内容を確認してください</div>
+        <div class="confirm-card">
+          <div class="confirm-row"><span class="confirm-key">営業所</span><span class="confirm-val" id="cf-office">—</span></div>
+          <div class="confirm-row"><span class="confirm-key">来店日</span><span class="confirm-val" id="cf-date">—</span></div>
+          <div class="confirm-row"><span class="confirm-key">時間</span><span class="confirm-val" id="cf-time">—</span></div>
+          <div class="confirm-row"><span class="confirm-key">お名前</span><span class="confirm-val" id="cf-name">—</span></div>
+          <div class="confirm-row"><span class="confirm-key">年齢</span><span class="confirm-val" id="cf-age">—</span></div>
+          <div class="confirm-row"><span class="confirm-key">地域</span><span class="confirm-val" id="cf-area">—</span></div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7">※ 確定後、担当者よりLINEまたは電話でご連絡します。</p>
+        <div class="apply-nav">
+          <button class="btn-apply-back" onclick="applyStep(3)">← 戻る</button>
+          <button class="btn-apply-next" onclick="submitApply()">✅ これで申し込む</button>
+        </div>
+      </div>
+
+      <!-- 完了 -->
+      <div class="apply-step" id="as-5">
+        <div class="apply-done" style="margin-top:20px">
+          <div class="apply-done-icon">🎉</div>
+          <div class="apply-done-title">申し込みを受け付けました</div>
+          <div class="apply-done-msg">
+            担当者よりLINEまたは電話でご連絡します。<br>
+            お急ぎの方はLINEでご連絡ください。
+          </div>
+          <a href="https://lin.ee/UnqfgBe" style="display:block;margin-top:18px;background:var(--line);color:#fff;padding:14px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;text-align:center">💬 LINEで確認する</a>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /apply-section -->
+
+  <!-- STICKY -->
+  <div class="sticky">
+    <a href="https://lin.ee/UnqfgBe" class="s-line">💬 LINE相談</a>
+    <a href="tel:0794382488" class="s-tel">📞 電話</a>
+  </div>
+
+</div><!-- /result-page -->
+
+<script>
+const state = {want:'',have:'',discounts:[],anket:{},name:'',tel:''};
+const PRICES = {
+  'car-at':{'none':298000,'gen':268000,'car-at':0,'car-mt':0,'bike':248000},
+  'car-mt':{'none':328000,'gen':298000,'car-at':58000,'car-mt':0,'bike':268000},
+  'bike-mid':{'none':168000,'gen':148000,'car-at':148000,'car-mt':148000,'bike':0},
+  'bike-large':{'none':198000,'gen':178000,'car-at':178000,'car-mt':178000,'bike':88000},
+  'paper':{'none':38000,'gen':38000,'car-at':38000,'car-mt':38000,'bike':38000},
+  'other':{'none':358000,'gen':328000,'car-at':298000,'car-mt':278000,'bike':278000}
+};
+const COURSE_NAMES = {
+  'car-at':'普通車AT','car-mt':'普通車MT',
+  'bike-mid':'普通二輪','bike-large':'大型二輪',
+  'paper':'ペーパードライバー講習','other':'中型免許等'
+};
+const HAVE_NAMES = {'none':'免許なし','gen':'原付','car-at':'普通車AT','car-mt':'普通車MT','bike':'二輪免許'};
+const DISCOUNT = {'family':5000,'friend':5000,'intro':3000,'grad':3000};
+
+function select(btn, key, val){
+  const grid = btn.closest('.choice-grid');
+  grid.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state[key] = val;
+  const nextId = key==='want'?'next-1':'next-2';
+  const nb = document.getElementById(nextId);
+  if(nb) nb.disabled = false;
+}
+
+function ankSelect(btn, group, val){
+  const grid = btn.closest('.choice-grid');
+  if(grid){
+    grid.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
+  }
+  btn.classList.add('selected');
+  state.anket = state.anket || {};
+  state.anket[group] = val;
+  // 割引自動判定
+  state.discounts = [];
+  const a = state.anket;
+  if(a.intro==='yes') state.discounts.push('intro');
+  if(a.family==='yes') state.discounts.push('family');
+  if(a.members==='two') state.discounts.push('friend');
+}
+
+function checkName(){
+  const name = document.getElementById('input-name').value.trim();
+  const age  = document.getElementById('input-age').value.trim();
+  const area = document.getElementById('input-area').value;
+  state.name = name;
+  document.getElementById('next-4').disabled = !(name.length > 0 && age.length > 0 && area.length > 0);
+}
+
+function goStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  const pct = [0,25,50,75,100][n] || 0;
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-label').textContent = 'STEP '+n+' / 4';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showResult(){
+  state.name = document.getElementById('input-name').value.trim();
+  state.age  = document.getElementById('input-age').value.trim();
+  state.area = document.getElementById('input-area').value;
+  state.tel  = document.getElementById('input-tel').value.trim();
+  const base = (PRICES[state.want]||{})[state.have||'none'] || 298000;
+  let disc = 0;
+  state.discounts.forEach(d=>{ disc += DISCOUNT[d]||0; });
+  const final = Math.max(base - disc, 0);
+  const courseName = COURSE_NAMES[state.want]||'普通車AT';
+  const haveName   = HAVE_NAMES[state.have]||'免許なし';
+  document.getElementById('r-course').textContent = courseName+'（'+haveName+'）';
+  document.getElementById('r-price').innerHTML = final.toLocaleString()+'<span>円〜</span>';
+  const slots = 3;
+  document.getElementById('r-slots').textContent = slots;
+  const dc = document.getElementById('r-dots');
+  dc.innerHTML='';
+  for(let i=0;i<8;i++){
+    const d=document.createElement('div');
+    d.className='dot'+(i<slots?' on':'');
+    dc.appendChild(d);
+  }
+  document.getElementById('form-page').style.display='none';
+  document.getElementById('result-page').classList.add('active');
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+
+
+// ════ 申し込みセクション ════
+const OFFICES = [
+  {id:'nakatsu', name:'中津営業所', addr:'加古川市加古川町中津550-6', tel:'079-423-8192',
+   hours:'13:00〜18:00', close:'月曜日', closeDay:1},
+  {id:'awazuminami', name:'粟津南営業所', addr:'加古川市加古川町木村105-5', tel:'079-425-5520',
+   hours:'13:00〜18:00', close:'火曜日', closeDay:2},
+  {id:'noguchi', name:'野口営業所', addr:'加古川市野口町良野603-1', tel:'079-423-8015',
+   hours:'13:00〜18:00', close:'水曜日', closeDay:3},
+];
+const FRIDAY = 5;
+const applyState = {office:null, date:null, time:null};
+
+function isOfficeClosed(office, date){
+  const d = new Date(date + 'T00:00:00');
+  const day = d.getDay();
+  if(day === FRIDAY) return true;   // 金曜は全営業所休業
+  if(day === 0) return false;       // 日曜は営業
+  return day === office.closeDay;   // 各営業所の定休日
+}
+
+function buildOfficeGrid(){
+  const grid = document.getElementById('office-grid');
+  if(!grid || grid.children.length > 0) return;
+  const today = new Date();
+  OFFICES.forEach(o => {
+    const closed = isOfficeClosed(o, today.toISOString().split('T')[0]);
+    const card = document.createElement('button');
+    card.className = 'office-card' + (closed ? ' closed' : '');
+    card.innerHTML = `
+      <div class="oc-head">
+        <span class="oc-name">${o.name}</span>
+        <span class="oc-badge ${closed?'today-close':'open'}">${closed?'本日休業':'受付中'}</span>
+      </div>
+      <div class="oc-info">
+        <span>📍 ${o.addr}</span><br>
+        <span>📞 ${o.tel}</span>
+        <span>⏰ ${o.hours}</span>
+        <span>❌ 定休：${o.close}・毎週金曜</span>
+      </div>`;
+    card.onclick = () => {
+      document.querySelectorAll('.office-card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      applyState.office = o;
+      document.getElementById('anext-1').disabled = false;
+    };
+    grid.appendChild(card);
+  });
+}
+
+function buildDateGrid(){
+  const grid = document.getElementById('date-grid');
+  grid.innerHTML = '';
+  if(!applyState.office) return;
+  const today = new Date();
+  const DAYS = ['日','月','火','水','木','金','土'];
+  let count = 0, offset = 1;
+  while(count < 14){
+    const d = new Date(today);
+    d.setDate(today.getDate() + offset);
+    offset++;
+    const dateStr = d.toISOString().split('T')[0];
+    const closed = isOfficeClosed(applyState.office, dateStr);
+    const isSun = d.getDay() === 0;
+    const isSat = d.getDay() === 6;
+    const btn = document.createElement('button');
+    btn.className = 'date-btn' + (closed ? ' unavail' : '');
+    const mm = d.getMonth()+1, dd = d.getDate();
+    btn.innerHTML = `<div class="db-day">${DAYS[d.getDay()]}</div><div class="db-date">${mm}/${dd}</div>${closed?'<div class="db-holi">休業</div>':''}`;
+    if(!closed){
+      btn.onclick = () => {
+        document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        applyState.date = `${mm}月${dd}日（${DAYS[d.getDay()]}）`;
+        document.getElementById('anext-2').disabled = false;
+      };
     }
-
-    const now = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm');
-
-    sheet.appendRow([
-      now,
-      data.name    || '',
-      data.age     || '',
-      data.area    || '',
-      data.tel     || '',
-      data.want    || '',
-      data.have    || '',
-      data.office  || '',
-      data.date    || '',
-      data.time    || '',
-      data.intro   || '',
-      data.family  || '',
-      data.members || '',
-      data.source  || '',
-    ]);
-
-    GmailApp.sendEmail(
-      NOTIFY_EMAIL,
-      '【加古川教習所】新規申し込み：' + (data.name || '名前未入力'),
-      '━━━━━━━━━━━━━━━━━━\n' +
-      '新規申し込みがありました\n' +
-      '━━━━━━━━━━━━━━━━━━\n' +
-      '受付日時　：' + now + '\n' +
-      'お名前　　：' + (data.name   || '') + '\n' +
-      '年齢　　　：' + (data.age    || '') + '歳\n' +
-      '地域　　　：' + (data.area   || '') + '\n' +
-      '電話番号　：' + (data.tel    || '') + '\n' +
-      '取得免許　：' + (data.want   || '') + '\n' +
-      '所持免許　：' + (data.have   || '') + '\n' +
-      '営業所　　：' + (data.office || '') + '\n' +
-      '来店日　　：' + (data.date   || '') + '\n' +
-      '来店時間　：' + (data.time   || '') + '\n' +
-      '━━━━━━━━━━━━━━━━━━\n'
-    );
-
-    return ContentService
-      .createTextOutput(JSON.stringify({status:'ok'}))
-      .setMimeType(ContentService.MimeType.JSON);
-
-  } catch(err) {
-    Logger.log('エラー：' + err.toString());
-    return ContentService
-      .createTextOutput(JSON.stringify({status:'error', message: err.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
+    grid.appendChild(btn);
+    count++;
   }
 }
 
-function testPost() {
-  const dummy = {
-    postData: {
-      contents: JSON.stringify({
-        name:'テスト太郎', age:'18', area:'加古川市',
-        tel:'090-0000-0000', want:'普通車AT', have:'免許なし',
-        office:'中津営業所', date:'4月15日（火）', time:'14:00',
-        intro:'なし', family:'いいえ', members:'1人', source:'Instagram'
-      })
-    }
-  };
-  doPost(dummy);
-  Logger.log('テスト完了');
+function buildTimeGrid(){
+  const grid = document.getElementById('time-grid');
+  grid.innerHTML = '';
+  const times = ['13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+  times.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'time-btn';
+    btn.textContent = t;
+    btn.onclick = () => {
+      document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      applyState.time = t;
+      document.getElementById('anext-3').disabled = false;
+    };
+    grid.appendChild(btn);
+  });
 }
+
+function applyStep(n){
+  if(n===2) buildDateGrid();
+  if(n===3) buildTimeGrid();
+  if(n===4){
+    document.getElementById('cf-office').textContent = applyState.office ? applyState.office.name : '—';
+    document.getElementById('cf-date').textContent   = applyState.date || '—';
+    document.getElementById('cf-time').textContent   = applyState.time ? applyState.time+'〜' : '—';
+    document.getElementById('cf-name').textContent   = state.name || '（未入力）';
+  }
+  document.querySelectorAll('.apply-step').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById('as-'+n);
+  if(el){
+    el.classList.add('active');
+    setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),50);
+  }
+}
+
+function submitApply(){
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbxnbCCAj-FKSnn1yS2sHCgYuM6sqoiiRH79XWbXq3-Q-pHn4PLDVkj9wWh9MH23JSex6A/exec';
+
+  // 送信データ組み立て
+  const payload = {
+    name:    state.name    || '',
+    age:     state.age     || '',
+    area:    state.area    || '',
+    tel:     state.tel     || '',
+    want:    COURSE_NAMES[state.want]  || state.want  || '',
+    have:    HAVE_NAMES[state.have]    || state.have  || '',
+    office:  applyState.office ? applyState.office.name : '',
+    date:    applyState.date  || '',
+    time:    applyState.time  || '',
+    intro:   state.anket.intro   || '',
+    family:  state.anket.family  || '',
+    members: state.anket.members || '',
+    source:  state.anket.source  || '',
+  };
+
+  // ボタンを送信中に変更
+  const submitBtn = document.querySelector('#as-4 .btn-apply-next');
+  if(submitBtn){ submitBtn.textContent = '送信中...'; submitBtn.disabled = true; }
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    applyStep(5);
+  })
+  .catch((err) => {
+    console.error(err);
+    applyStep(5); // エラーでも完了画面へ
+  });
+}
+
+// 結果ページ表示時に営業所カードを生成
+const _origShowResult = showResult;
+showResult = function(){
+  _origShowResult();
+  buildOfficeGrid();
+};
+
+
+</script>
+</body>
+</html>
