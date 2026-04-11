@@ -743,6 +743,32 @@ function showResult(){
   document.getElementById('form-page').style.display='none';
   document.getElementById('result-page').classList.add('active');
   window.scrollTo({top:0,behavior:'instant'});
+
+  // ── 料金を見るボタン押下時点で顧客情報をスプレッドシートに送信 ──
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzxbz1kmIlZL9Ee75TaqGf_DbSmNYMW3OpqSkpZoBQH3lg-eNshEwmHHSp9FWW8X5ap7w/exec';
+  const payload = {
+    type:    '料金診断',
+    name:    state.name    || '',
+    age:     state.age     || '',
+    area:    state.area    || '',
+    tel:     state.tel     || '',
+    want:    COURSE_NAMES[state.want]  || state.want  || '',
+    have:    HAVE_NAMES[state.have]    || state.have  || '',
+    price:   final.toLocaleString() + '円〜',
+    intro:   state.anket.intro   || '',
+    family:  state.anket.family  || '',
+    members: state.anket.members || '',
+    source:  state.anket.source  || '',
+    office:  '',
+    date:    '',
+    time:    '',
+  };
+  fetch(GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).catch(err => console.log('opt-in送信エラー:', err));
 }
 
 
@@ -864,7 +890,7 @@ function applyStep(n){
 }
 
 function submitApply(){
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyTw08EasO_Mk_SqyN-1qiANYzdzsmqg9FIUCyrV00L6wfPFb4XRbzoomB9JSlgI7hWfw/exec';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzxbz1kmIlZL9Ee75TaqGf_DbSmNYMW3OpqSkpZoBQH3lg-eNshEwmHHSp9FWW8X5ap7w/exec';
 
   // 送信データ組み立て
   const payload = {
