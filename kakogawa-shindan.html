@@ -406,6 +406,20 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         </div>
 
         <div>
+          <div class="ank-label">当校の卒業生ですか？（卒割11,000円）</div>
+          <div class="choice-grid col2" style="margin-top:8px">
+            <button class="choice-btn" onclick="ankSelect(this,'grad','yes')">
+              <span class="choice-icon">🎓</span>
+              <div class="choice-body"><div class="choice-label">はい</div></div>
+            </button>
+            <button class="choice-btn" onclick="ankSelect(this,'grad','no')">
+              <span class="choice-icon">✗</span>
+              <div class="choice-body"><div class="choice-label">いいえ</div></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
           <div class="ank-label">当校を知ったきっかけ</div>
           <div class="choice-grid col2" style="margin-top:8px">
             <button class="choice-btn" onclick="ankSelect(this,'source','instagram')">
@@ -502,26 +516,35 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <!-- RESULT HERO -->
   <div class="result-hero">
-    <div class="rh-label">あなたの概算料金</div>
+    <div class="rh-label">診断完了</div>
     <div class="rh-name" id="r-course">普通車AT（免許なし）</div>
-    <div class="rh-price" id="r-price">298,000<span>円〜</span></div>
-    <div class="rh-note">※ 時期・キャンペーン適用前の概算</div>
+    <div style="margin:12px 0 4px">
+      <span style="font-size:15px;color:rgba(255,255,255,.7)">あなたに合った最安プランを</span>
+    </div>
+    <div style="font-size:26px;font-weight:900;color:#6FDDBB;line-height:1.3;margin-bottom:16px">担当者が個別にご案内します</div>
     <div class="cheaper-box">
-      <div class="cheaper-tag">⚠️ この金額が確定ではありません</div>
-      <p class="cheaper-msg"><span>あなた専用の最安プランが</span>まだ適用されていない可能性があります。担当者が個別に最安値をご案内します。</p>
+      <div class="cheaper-tag">🎁 割引・キャンペーン適用後の料金をご案内</div>
+      <p class="cheaper-msg">時期・割引の組み合わせで料金が変わります。<span>LINEで1分相談するだけで最安値をお伝えします。</span></p>
     </div>
   </div>
 
   <!-- APPLY CTA -->
   <div style="padding:20px 16px 0">
-    <div style="background:linear-gradient(135deg,#0A8A6E,#0D2137);border-radius:16px;padding:22px 18px;text-align:center">
-      <div style="font-size:11px;font-weight:700;color:#5DDDBB;letter-spacing:.12em;margin-bottom:10px">✅ 次のステップ</div>
-      <div style="font-size:18px;font-weight:900;color:#fff;line-height:1.45;margin-bottom:8px">入校申し込みは<br>来店が必要です</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.65;margin-bottom:18px">書類記入あり・約15分。<br>下から営業所と日程を選んでください。</div>
+    <div style="background:linear-gradient(135deg,#0A8A6E,#0D2137);border-radius:16px;padding:22px 18px;text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(111,221,187,.12)"></div>
+      <div style="position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,208,128,.1)"></div>
+      <div style="display:inline-block;background:#FFD080;color:#7C4A00;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;margin-bottom:12px;letter-spacing:.08em">🎁 来店予約で特典あり</div>
+      <div style="font-size:22px;font-weight:900;color:#fff;line-height:1.4;margin-bottom:8px">今すぐ来店日程を<br>予約してください</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.8);line-height:1.7;margin-bottom:6px">
+        <span style="color:#6FDDBB;font-weight:700">普通車</span>はさらに¥5,500引き<br>
+        <span style="color:#6FDDBB;font-weight:700">二輪</span>はスケジュールプランで約¥2,000お得
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,.55);margin-bottom:18px">所要時間15分・押し売りなし</div>
       <button onclick="document.getElementById('apply-section').scrollIntoView({behavior:'smooth',block:'start'})"
-        style="display:block;width:100%;background:#fff;color:#0A8A6E;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer">
-        📅 来店日程を選んで申し込む
+        style="display:block;width:100%;background:#FFD080;color:#0D2137;border:none;border-radius:14px;padding:18px;font-size:17px;font-weight:900;font-family:inherit;cursor:pointer;letter-spacing:.02em">
+        📅 来店日程を予約する →
       </button>
+      <p style="font-size:11px;color:rgba(255,255,255,.45);margin-top:10px">予約後に担当者よりご連絡します</p>
     </div>
   </div>
 
@@ -550,10 +573,14 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <!-- LIMIT -->
   <div class="sec mt24">
     <div class="limit-bar">
-      <div class="limit-title">⚡ 今週の入校枠</div>
+      <div class="limit-title">⚡ 今週の来店予約枠</div>
       <div class="limit-main">残り <em id="r-slots">3</em> 名</div>
       <div class="limit-dots" id="r-dots"></div>
-      <p class="limit-note">このままだと予約が埋まる可能性があります。キャンペーン料金の適用は早い方から優先です。</p>
+      <p class="limit-note" style="margin-top:10px;font-size:13px;color:rgba(255,255,255,.9);font-weight:500">枠が埋まると特典割引が適用できなくなります。<br>今すぐ下から予約してください。</p>
+      <button onclick="document.getElementById('apply-section').scrollIntoView({behavior:'smooth',block:'start'})"
+        style="display:block;width:100%;margin-top:14px;background:#FFD080;color:#7C1F1F;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">
+        今すぐ予約する →
+      </button>
     </div>
   </div>
 
@@ -562,8 +589,8 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     <div class="cta-lead">次のアクションを選んでください</div>
     <div class="cta-stack">
       <button onclick="document.getElementById('apply-section').scrollIntoView({behavior:'smooth',block:'start'})"
-        class="cta-btn btn-visit" style="border:none;font-family:inherit;cursor:pointer">
-        ✅ 申し込む <span class="cta-sub">来店日程を選ぶ</span>
+        class="cta-btn" style="border:none;font-family:inherit;cursor:pointer;background:#FFD080;color:#0D2137;box-shadow:0 5px 18px rgba(255,208,128,.5);font-size:17px;padding:18px 20px;border-radius:14px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
+        📅 来店日程を予約する <span style="font-size:11px;font-weight:400;opacity:.7">特典あり・15分</span>
       </button>
       <a href="https://lin.ee/UnqfgBe" class="cta-btn btn-line">💬 LINEで相談する <span class="cta-sub">電話なし・今すぐOK</span></a>
       <a href="https://lin.ee/UnqfgBe" class="cta-btn btn-info">💰 料金だけ確認する <span class="cta-sub" style="color:var(--muted)">LINEで1分</span></a>
@@ -582,9 +609,9 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
     <!-- ヒーロー -->
     <div class="apply-hero">
-      <div class="apply-hero-tag">✅ 申し込む</div>
-      <div class="apply-hero-title">入校申し込みは<br>必ず来店が必要です</div>
-      <div class="apply-hero-sub">書類記入がございます。<br>所要時間は約15分です。</div>
+      <div class="apply-hero-tag">📅 来店予約</div>
+      <div class="apply-hero-title">下から営業所と<br>日程を選んでください</div>
+      <div class="apply-hero-sub">所要時間15分・押し売りなし<br>来店するだけで特典割引が適用されます</div>
     </div>
 
     <!-- 注意書き -->
@@ -634,6 +661,12 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
       <!-- STEP D: 確認 -->
       <div class="apply-step" id="as-4">
         <div class="apply-step-title" style="margin-top:20px">内容を確認してください</div>
+        <!-- 来店特典バナー -->
+        <div id="visit-bonus" style="background:linear-gradient(135deg,#0A8A6E,#085041);border-radius:14px;padding:16px;margin-bottom:14px">
+          <div style="font-size:11px;font-weight:700;color:#6FDDBB;letter-spacing:.1em;margin-bottom:8px">🎁 来店予約特典</div>
+          <div id="bonus-text" style="font-size:14px;font-weight:700;color:#fff;line-height:1.65"></div>
+          <p style="font-size:11px;color:rgba(255,255,255,.65);margin-top:6px">来店時に担当者にお伝えください</p>
+        </div>
         <div class="confirm-card">
           <div class="confirm-row"><span class="confirm-key">営業所</span><span class="confirm-val" id="cf-office">—</span></div>
           <div class="confirm-row"><span class="confirm-key">来店日</span><span class="confirm-val" id="cf-date">—</span></div>
@@ -658,6 +691,10 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
             担当者よりLINEまたは電話でご連絡します。<br>
             お急ぎの方はLINEでご連絡ください。
           </div>
+          <div id="done-bonus" style="background:#F0FAF7;border:1.5px solid #0A8A6E;border-radius:12px;padding:14px;margin-top:14px;text-align:left">
+            <div style="font-size:11px;font-weight:700;color:#0A8A6E;letter-spacing:.08em;margin-bottom:6px">🎁 来店時の特典をお忘れなく</div>
+            <div id="done-bonus-text" style="font-size:13px;font-weight:700;color:#0D2137;line-height:1.65"></div>
+          </div>
           <a href="https://lin.ee/UnqfgBe" style="display:block;margin-top:18px;background:var(--line);color:#fff;padding:14px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;text-align:center">💬 LINEで確認する</a>
         </div>
       </div>
@@ -667,8 +704,12 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 
   <!-- STICKY -->
   <div class="sticky">
-    <a href="https://lin.ee/UnqfgBe" class="s-line">💬 LINE相談</a>
-    <a href="tel:0794382488" class="s-tel">📞 電話</a>
+    <button onclick="document.getElementById('apply-section').scrollIntoView({behavior:'smooth',block:'start'})"
+      style="flex:1.4;padding:12px 6px;border-radius:11px;font-size:13px;font-weight:700;border:none;cursor:pointer;font-family:inherit;background:#FFD080;color:#0D2137">
+      📅 来店予約
+    </button>
+    <a href="https://lin.ee/UnqfgBe" class="s-line" style="flex:1">💬 LINE</a>
+    <a href="tel:0794382488" class="s-tel" style="flex:0.8">📞 電話</a>
   </div>
 
 </div><!-- /result-page -->
@@ -676,19 +717,20 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <script>
 const state = {want:'',have:'',discounts:[],anket:{},name:'',tel:''};
 const PRICES = {
-  // 普通車AT: チャレンジコース基本料金
+  // 普通車AT
   'car-at':{'none':326960,'gen':326960,'car-at':0,'car-mt':0,'bike':269320,'large':231700},
-  // 普通車MT: チャレンジコース基本料金
+  // 普通車MT
   'car-mt':{'none':348410,'gen':348410,'car-at':58000,'car-mt':0,'bike':290770,'large':253150},
-  // 普通自動二輪MT: 免なし=156530, 普通・中型・大型持ち=108570
+  // 普通自動二輪MT: 免なし・原付=156530 / 普通・中型・大型=108570
   'bike-mid':{'none':156530,'gen':156530,'car-at':108570,'car-mt':108570,'bike':0,'large':108570},
-  // 普通自動二輪AT: 免なし=151910, 普通・中型・大型持ち=96250
+  // 普通自動二輪AT: 免なし・原付=151910 / 普通・中型・大型=96250
   'bike-mid-at':{'none':151910,'gen':151910,'car-at':96250,'car-mt':96250,'bike':0,'large':96250},
-  // 大型自動二輪MT: 普通・中型・大型持ち=202290, 普通二輪MT=99110, 普通二輪AT=120230
-  'bike-large':{'none':202290,'gen':202290,'car-at':202290,'car-mt':202290,'bike':99110,'large':202290},
-  // 小型二輪MT: なし・原付=136510, 普通〜大型=82610
+  // 大型自動二輪MT（免なし・原付は取得不可のため車・二輪持ちのみ）
+  // 普通・中型・大型=202290 / 普通二輪MT=99110 / 普通二輪AT=120230 / 小型二輪MT=141350 / 小型二輪AT=162470
+  'bike-large':{'none':202290,'gen':202290,'car-at':202290,'car-mt':202290,'bike':99110,'bike-at':120230,'bike-small-mt':141350,'bike-small-at':162470,'large':202290},
+  // 小型二輪MT: なし・原付=136510 / 普通〜大型=82610
   'bike-small-mt':{'none':136510,'gen':136510,'car-at':82610,'car-mt':82610,'bike':82610,'large':82610},
-  // 小型二輪AT: なし・原付=123310, 四輪=73810
+  // 小型二輪AT限定: なし・原付=123310 / 四輪持ち=73810
   'bike-small-at':{'none':123310,'gen':123310,'car-at':73810,'car-mt':73810,'bike':123310,'large':73810},
   'paper':{'none':38000,'gen':38000,'car-at':38000,'car-mt':38000,'bike':38000,'large':38000},
   'other':{'none':358000,'gen':328000,'car-at':298000,'car-mt':278000,'bike':278000,'large':278000}
@@ -701,7 +743,7 @@ const COURSE_NAMES = {
   'paper':'ペーパードライバー講習','other':'中型免許等'
 };
 const HAVE_NAMES = {'none':'免許なし','gen':'原付','car-at':'普通車AT','car-mt':'普通車MT','bike':'二輪免許','large':'中型・大型免許'};
-const DISCOUNT = {'family':5000,'friend':5000,'intro':3000,'grad':3000};
+const DISCOUNT = {'family':5500,'friend':5500,'intro':5500,'grad':11000};
 
 function select(btn, key, val){
   const grid = btn.closest('.choice-grid');
@@ -727,6 +769,7 @@ function ankSelect(btn, group, val){
   if(a.intro==='yes') state.discounts.push('intro');
   if(a.family==='yes') state.discounts.push('family');
   if(a.members==='two') state.discounts.push('friend');
+  if(a.grad==='yes') state.discounts.push('grad');
 }
 
 function checkName(){
@@ -758,7 +801,7 @@ function showResult(){
   const courseName = COURSE_NAMES[state.want]||'普通車AT';
   const haveName   = HAVE_NAMES[state.have]||'免許なし';
   document.getElementById('r-course').textContent = courseName+'（'+haveName+'）';
-  document.getElementById('r-price').innerHTML = final.toLocaleString()+'<span>円〜</span>';
+  // 料金は非表示（LINEで個別案内）
   const slots = 3;
   document.getElementById('r-slots').textContent = slots;
   const dc = document.getElementById('r-dots');
@@ -782,7 +825,7 @@ function showResult(){
     tel:     state.tel     || '',
     want:    COURSE_NAMES[state.want]  || state.want  || '',
     have:    HAVE_NAMES[state.have]    || state.have  || '',
-    price:   final.toLocaleString() + '円〜',
+    price:   final.toLocaleString() + '円〜', // 内部計算値（LP非表示）
     intro:   state.anket.intro   || '',
     family:  state.anket.family  || '',
     members: state.anket.members || '',
@@ -949,6 +992,10 @@ function submitApply(){
   })
   .then(() => {
     applyStep(5);
+    const wk = state.want||'';
+    let doneBonus = wk==='car-at'||wk==='car-mt' ? '普通車コース来店予約割引：¥5,500 お値引き' : wk.startsWith('bike') ? '二輪コーススケジュールプラン：約¥2,000 お得なプランをご案内' : '来店時に最安プランをご案内します';
+    const dbt = document.getElementById('done-bonus-text');
+    if(dbt) dbt.textContent = doneBonus;
   })
   .catch((err) => {
     console.error(err);
