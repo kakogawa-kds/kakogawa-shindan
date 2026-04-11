@@ -745,7 +745,7 @@ function showResult(){
   window.scrollTo({top:0,behavior:'instant'});
 
   // ── 料金を見るボタン押下時点で顧客情報をスプレッドシートに送信 ──
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzxbz1kmIlZL9Ee75TaqGf_DbSmNYMW3OpqSkpZoBQH3lg-eNshEwmHHSp9FWW8X5ap7w/exec';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmvoz-IitlXEossMsIRmMMc34YMc9gWPKjd5INN5_4qGjL7WlEu_jjPT0V33Hd9gS_qQ/exec';
   const payload = {
     type:    '料金診断',
     name:    state.name    || '',
@@ -890,7 +890,7 @@ function applyStep(n){
 }
 
 function submitApply(){
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzxbz1kmIlZL9Ee75TaqGf_DbSmNYMW3OpqSkpZoBQH3lg-eNshEwmHHSp9FWW8X5ap7w/exec';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzmvoz-IitlXEossMsIRmMMc34YMc9gWPKjd5INN5_4qGjL7WlEu_jjPT0V33Hd9gS_qQ/exec';
 
   // 送信データ組み立て
   const payload = {
