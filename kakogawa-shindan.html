@@ -287,11 +287,23 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         </button>
         <button class="choice-btn" onclick="select(this,'want','bike-mid')">
           <span class="choice-icon">🏍</span>
-          <div class="choice-body"><div class="choice-label">普通二輪</div><div class="choice-sub">バイク400cc以下</div></div>
+          <div class="choice-body"><div class="choice-label">普通二輪MT</div><div class="choice-sub">400cc以下・マニュアル</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','bike-mid-at')">
+          <span class="choice-icon">🏍</span>
+          <div class="choice-body"><div class="choice-label">普通二輪AT</div><div class="choice-sub">400cc以下・AT限定</div></div>
         </button>
         <button class="choice-btn" onclick="select(this,'want','bike-large')">
           <span class="choice-icon">🏍</span>
-          <div class="choice-body"><div class="choice-label">大型二輪</div><div class="choice-sub">バイク大型</div></div>
+          <div class="choice-body"><div class="choice-label">大型二輪MT</div><div class="choice-sub">大型バイク</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','bike-small-mt')">
+          <span class="choice-icon">🛵</span>
+          <div class="choice-body"><div class="choice-label">小型二輪MT</div><div class="choice-sub">125cc以下・マニュアル</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'want','bike-small-at')">
+          <span class="choice-icon">🛵</span>
+          <div class="choice-body"><div class="choice-label">小型二輪AT</div><div class="choice-sub">125cc以下・AT限定</div></div>
         </button>
         <button class="choice-btn" onclick="select(this,'want','paper')">
           <span class="choice-icon">📄</span>
@@ -332,6 +344,10 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
         <button class="choice-btn" onclick="select(this,'have','bike')">
           <span class="choice-icon">🏍</span>
           <div class="choice-body"><div class="choice-label">二輪免許あり</div></div>
+        </button>
+        <button class="choice-btn" onclick="select(this,'have','large')">
+          <span class="choice-icon">🚛</span>
+          <div class="choice-body"><div class="choice-label">中型・大型免許あり</div></div>
         </button>
       </div>
       <div class="nav-wrap">
@@ -660,19 +676,31 @@ select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 <script>
 const state = {want:'',have:'',discounts:[],anket:{},name:'',tel:''};
 const PRICES = {
-  'car-at':{'none':298000,'gen':268000,'car-at':0,'car-mt':0,'bike':248000},
-  'car-mt':{'none':328000,'gen':298000,'car-at':58000,'car-mt':0,'bike':268000},
-  'bike-mid':{'none':168000,'gen':148000,'car-at':148000,'car-mt':148000,'bike':0},
-  'bike-large':{'none':198000,'gen':178000,'car-at':178000,'car-mt':178000,'bike':88000},
-  'paper':{'none':38000,'gen':38000,'car-at':38000,'car-mt':38000,'bike':38000},
-  'other':{'none':358000,'gen':328000,'car-at':298000,'car-mt':278000,'bike':278000}
+  // 普通車AT: チャレンジコース基本料金
+  'car-at':{'none':326960,'gen':326960,'car-at':0,'car-mt':0,'bike':269320,'large':231700},
+  // 普通車MT: チャレンジコース基本料金
+  'car-mt':{'none':348410,'gen':348410,'car-at':58000,'car-mt':0,'bike':290770,'large':253150},
+  // 普通自動二輪MT: 免なし=156530, 普通・中型・大型持ち=108570
+  'bike-mid':{'none':156530,'gen':156530,'car-at':108570,'car-mt':108570,'bike':0,'large':108570},
+  // 普通自動二輪AT: 免なし=151910, 普通・中型・大型持ち=96250
+  'bike-mid-at':{'none':151910,'gen':151910,'car-at':96250,'car-mt':96250,'bike':0,'large':96250},
+  // 大型自動二輪MT: 普通・中型・大型持ち=202290, 普通二輪MT=99110, 普通二輪AT=120230
+  'bike-large':{'none':202290,'gen':202290,'car-at':202290,'car-mt':202290,'bike':99110,'large':202290},
+  // 小型二輪MT: なし・原付=136510, 普通〜大型=82610
+  'bike-small-mt':{'none':136510,'gen':136510,'car-at':82610,'car-mt':82610,'bike':82610,'large':82610},
+  // 小型二輪AT: なし・原付=123310, 四輪=73810
+  'bike-small-at':{'none':123310,'gen':123310,'car-at':73810,'car-mt':73810,'bike':123310,'large':73810},
+  'paper':{'none':38000,'gen':38000,'car-at':38000,'car-mt':38000,'bike':38000,'large':38000},
+  'other':{'none':358000,'gen':328000,'car-at':298000,'car-mt':278000,'bike':278000,'large':278000}
 };
 const COURSE_NAMES = {
   'car-at':'普通車AT','car-mt':'普通車MT',
-  'bike-mid':'普通二輪','bike-large':'大型二輪',
+  'bike-mid':'普通二輪MT','bike-mid-at':'普通二輪AT',
+  'bike-large':'大型二輪MT',
+  'bike-small-mt':'小型二輪MT','bike-small-at':'小型二輪AT',
   'paper':'ペーパードライバー講習','other':'中型免許等'
 };
-const HAVE_NAMES = {'none':'免許なし','gen':'原付','car-at':'普通車AT','car-mt':'普通車MT','bike':'二輪免許'};
+const HAVE_NAMES = {'none':'免許なし','gen':'原付','car-at':'普通車AT','car-mt':'普通車MT','bike':'二輪免許','large':'中型・大型免許'};
 const DISCOUNT = {'family':5000,'friend':5000,'intro':3000,'grad':3000};
 
 function select(btn, key, val){
