@@ -1353,6 +1353,9 @@ function submitForm() {
     希望免許: LICENSE_LABEL_MAP[answers.license] || answers.license || '',
     所持免許: CURRENT_LABEL_MAP[answers.current] || answers.current || '',
     料金:     priceStr,
+    紹介:     answers.refer === 'yes' ? 'あり' : 'なし',
+    家族割:   answers.family === 'yes' ? 'あり' : 'なし',
+    人数:     answers.group === '2' ? '2人以上' : '1人',
     流入元:   CHANNEL_LABEL_MAP[answers.channel] || answers.channel || '',
   });
 
