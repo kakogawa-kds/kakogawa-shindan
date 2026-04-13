@@ -1337,19 +1337,23 @@ function submitForm() {
     refer:'紹介', hp:'ホームページ', other:'その他'
   };
 
+  // 料金計算（送信用）
+  const licForPrice = answers.license || 'car_at';
+  const curForPrice = answers.current || 'none';
+  const baseForPrice = PRICE_TABLE[licForPrice] || [200000, 280000];
+  const offsetForPrice = CURRENT_DISCOUNT[curForPrice] || 0;
+  const priceStr = `${(baseForPrice[0] + offsetForPrice).toLocaleString()}円〜`;
+
   sendToSpreadsheet({
-    日時:        dateStr,
-    名前:        answers.name,
-    年齢:        answers.age,
-    地域:        answers.area,
-    電話番号:    answers.tel,
-    希望免許:    LICENSE_LABEL_MAP[answers.license] || answers.license || '',
-    所持免許:    CURRENT_LABEL_MAP[answers.current] || answers.current || '',
-    紹介あり:    answers.refer === 'yes' ? 'あり' : 'なし',
-    家族割:      answers.family === 'yes' ? 'あり' : 'なし',
-    入所人数:    answers.group === '2' ? '2人以上' : '1人',
-    卒業生:      answers.grad === 'yes' ? 'あり' : 'なし',
-    流入元:      CHANNEL_LABEL_MAP[answers.channel] || answers.channel || '',
+    日時:     dateStr,
+    名前:     answers.name,
+    年齢:     answers.age,
+    地域:     answers.area,
+    電話番号: answers.tel,
+    希望免許: LICENSE_LABEL_MAP[answers.license] || answers.license || '',
+    所持免許: CURRENT_LABEL_MAP[answers.current] || answers.current || '',
+    料金:     priceStr,
+    流入元:   CHANNEL_LABEL_MAP[answers.channel] || answers.channel || '',
   });
 
   setTimeout(() => {
