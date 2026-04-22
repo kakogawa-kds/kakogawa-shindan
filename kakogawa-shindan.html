@@ -1034,34 +1034,8 @@ async function submitStep2() {
   document.getElementById('loadingOverlay').classList.add('visible');
   btn.disabled = true;
 
-  const payload = {
-    送信日時: new Date().toLocaleString('ja-JP'),
-    名前: state.name,
-    電話番号: state.tel,
-    学生区分: state.student || '',
-    希望車種: '',        // 後の診断で取得
-    希望エリア: '',
-    取得希望時期: state.timing === 'summer' ? '夏休み' : (state.period || ''),
-    問い合わせ種別: state.timing === 'summer' ? '夏休み希望' : 'その他',
-    夏休み希望フラグ: state.timing === 'summer' ? 'TRUE' : 'FALSE',
-    備考: '',
-    流入ページ: location.href,
-    診断開始フラグ: 'TRUE',
-  };
-
-  try {
-    // no-corsで送信（CORSエラー回避）→ レスポンスは読めないが保存はされる
-    await fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch (e) {
-    console.error(e);
-  }
-
-  // 送信結果に関わらず診断へ進む
+  // Step2では送信せず状態を保存するだけ
+  // 診断完了時（goToResult）に全データをまとめて送信する
   state.submitted = true;
   document.getElementById('loadingOverlay').classList.remove('visible');
   showStep('diagStep1');
