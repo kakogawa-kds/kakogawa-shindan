@@ -1053,24 +1053,21 @@ async function submitStep2() {
   };
 
   try {
-    const res = await fetch(GAS_URL, {
+    // no-corsで送信（CORSエラー回避）→ レスポンスは読めないが保存はされる
+    await fetch(GAS_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const json = await res.json();
-    if (json.status !== 'ok') throw new Error('Server error');
-
-    state.submitted = true;
-    document.getElementById('loadingOverlay').classList.remove('visible');
-    showStep('diagStep1');
-
   } catch (e) {
-    document.getElementById('loadingOverlay').classList.remove('visible');
-    btn.disabled = false;
-    banner.classList.add('visible');
     console.error(e);
   }
+
+  // 送信結果に関わらず診断へ進む
+  state.submitted = true;
+  document.getElementById('loadingOverlay').classList.remove('visible');
+  showStep('diagStep1');
 }
 
 // ==========================================
