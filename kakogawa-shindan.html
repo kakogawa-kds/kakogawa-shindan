@@ -718,12 +718,33 @@
 
     <!-- 学生区分（任意） -->
     <div class="form-group">
-      <label class="form-label">学生区分<span class="optional">任意</span></label>
+      <label class="form-label">学生区分<span class="required">必須</span></label>
       <div class="radio-buttons" id="studentType">
         <button class="radio-btn" onclick="selectStudent(this,'高校生')">🎒 高校生</button>
         <button class="radio-btn" onclick="selectStudent(this,'大学生')">🎓 大学生</button>
         <button class="radio-btn" onclick="selectStudent(this,'一般')">👤 一般</button>
       </div>
+      <div class="form-error" id="errStudent">学生区分を選択してください</div>
+    </div>
+
+    <!-- お住まいの地域 -->
+    <div class="form-group">
+      <label class="form-label">お住まいの地域<span class="required">必須</span></label>
+      <select class="form-input" id="inputArea" onchange="state.area=this.value" style="font-size:16px">
+        <option value="">選択してください</option>
+        <option value="加古川市">加古川市</option>
+        <option value="高砂市">高砂市</option>
+        <option value="姫路市">姫路市</option>
+        <option value="明石市">明石市</option>
+        <option value="稲美町">稲美町</option>
+        <option value="播磨町">播磨町</option>
+        <option value="三木市">三木市</option>
+        <option value="小野市">小野市</option>
+        <option value="加西市">加西市</option>
+        <option value="神戸市西区">神戸市西区</option>
+        <option value="その他">その他</option>
+      </select>
+      <div class="form-error" id="errArea">お住まいの地域を選択してください</div>
     </div>
 
     <div class="privacy-note">
@@ -914,11 +935,12 @@ const LINE_URL = 'https://lin.ee/Tez7jxt';
 // STATE
 // ==========================================
 const state = {
-  timing: null,        // 'summer' | 'other'
-  period: null,        // 具体的な時期
+  timing: null,
+  period: null,
   name: '',
   tel: '',
   student: '',
+  area: '',
   license: null,
   currentLicense: null,
   discounts: { referral: false, family: false, group: 1, alumni: false },
@@ -1021,6 +1043,30 @@ function validateStep2() {
     state.name = name;
     state.tel = tel;
   }
+
+  // 学生区分
+  const errStudent = document.getElementById('errStudent');
+  if (!state.student) {
+    errStudent.classList.add('visible');
+    ok = false;
+  } else {
+    errStudent.classList.remove('visible');
+  }
+
+  // 地域
+  const area = document.getElementById('inputArea').value;
+  const errArea = document.getElementById('errArea');
+  const areaInput = document.getElementById('inputArea');
+  if (!area) {
+    errArea.classList.add('visible');
+    areaInput.classList.add('error');
+    ok = false;
+  } else {
+    errArea.classList.remove('visible');
+    areaInput.classList.remove('error');
+    state.area = area;
+  }
+
   return ok;
 }
 
@@ -1157,6 +1203,7 @@ function goToResult() {
     夏休み希望フラグ: state.timing === 'summer' ? 'TRUE' : 'FALSE',
     希望免許: licenseNames[state.license] || state.license,
     所持免許: currentNames[state.currentLicense] || state.currentLicense || '',
+    地域: state.area || '',
     割引: discountNames.join('・') || 'なし',
     流入: state.source || '',
     概算料金: priceText,
